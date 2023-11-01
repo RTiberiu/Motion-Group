@@ -1,0 +1,48 @@
+/*
+Quick rules:
+1. Do not edit logo outsize of rezising, this includes distorting
+2. Follow guide for which font to use where
+3. Adhere to colour scheme
+*/
+
+/*Text*/
+
+
+/*
+
+Must use Monument Extended for oversized headings and large display text
+Must use Helvetica for Document headings, body copy and annotations
+Ecomms and colab must be Arial
+*/
+
+
+/*Colour scheme*/
+body{background-color: #F5F1CF;}
+header{background-color: #233D1F;}
+/*
+Dark green/Moorland:
+    R:35 G:61 B:31
+    #233D1F
+    C:82 M:49 Y:91 K:61
+    PMS 350
+Light green/Moss green:
+    R:141 G:155 B:144
+    #8D9B90
+    C:48 M:28 Y:41 K:9
+    PMS 7494
+Red/Clay red:
+    R:250 G:89 B:89
+    #FA5959
+    C:0 M:73 Y:76 K:2
+    PMS 159
+Grey/Slate grey:
+    R:250 G:89 B:89
+    #FA5959
+    C:0 M:73 Y:76 K:2
+    PMS Cool Grey 10
+yellow/Warm sun:
+    R:245 G:201 B:207
+    #F5F1CF
+    C:6 M:3 Y:25 K:0
+    PMS 1205
+*/
