@@ -6,10 +6,14 @@ Quick rules:
 */
 
 /*Text*/
-
+h1{font-family: Arial, Helvetica, sans-serif;}
+h2{font-size: Arial, 'Monument Extended', sans-serif;}
+p{
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: lighter;
+}
 
 /*
-
 Must use Monument Extended for oversized headings and large display text
 Must use Helvetica for Document headings, body copy and annotations
 Ecomms and colab must be Arial
@@ -18,7 +22,7 @@ Ecomms and colab must be Arial
 
 /*Colour scheme*/
 body{background-color: #F5F1CF;}
-header{background-color: #233D1F;}
+header{background-color: #8D9B90;}
 /*
 Dark green/Moorland:
     R:35 G:61 B:31
