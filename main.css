@@ -6,23 +6,88 @@ Quick rules:
 */
 
 /*Text*/
-h1{font-family: Arial, Helvetica, sans-serif;}
-h2{font-size: Arial, 'Monument Extended', sans-serif;}
-p{
-    font-family: Arial, Helvetica, sans-serif;
-    font-weight: lighter;
-}
 
+/*ToDo fix sizes to comply with style guide*/
+h1{
+    font-family: Arial, Helvetica, sans-serif;
+    color:#FFFFFF;
+}
+h2{
+    font-family: Arial, 'Monument Extended', sans-serif;
+    color: #FFFFFF;
+}
+article p{
+    font-family: Helvetica, sans-serif;
+    font-weight: lighter;
+    color:#FFFFFF;
+}
+footer p{
+    color:#233D1F ;
+}
+footer a{
+    color: #233D1F;
+}
 /*
 Must use Monument Extended for oversized headings and large display text
 Must use Helvetica for Document headings, body copy and annotations
 Ecomms and colab must be Arial
 */
 
+/* button bar styling*/
+button{
+    background-color: #879275;;
+    color: #FFFFFF;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: lighter;
+    border: none;
+    
+}
+button:hover{
+    background-color: #233D1F;
+}
+ul{
+    list-style:none;
+    display: inline;
+}
+li{display: inline;}
+
+/*Img*/
+img{
+    width:99%;
+    max-width:1000px ;
+}
+
 
 /*Colour scheme*/
-body{background-color: #F5F1CF;}
-header{background-color: #8D9B90;}
+body{
+    background-color: #F5F1CF;
+    margin:0;
+}
+body div{
+    background-color: #8D9B90;
+    width: 100%;
+    margin-top: 0;
+    padding-bottom: 0.2%;
+}
+header{
+    background-color: #8D9B90;
+    padding-top: 1%;
+    padding-bottom: 1%;
+    margin-bottom: 0;
+}
+article{
+    margin:auto;
+    margin-bottom: 10%;
+}
+.Dark{
+    background-color:#879275;
+    padding:auto;
+}
+section{
+    width: 75%;
+    margin: auto;
+    padding-bottom: 5px;
+}
 /*
 Dark green/Moorland:
     R:35 G:61 B:31
