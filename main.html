@@ -3,6 +3,7 @@
         <meta charset="utf-8">
         <title>display prototype</title>
         <link rel="stylesheet" href="main.css">
+        
     </head>
 
     <body>
@@ -20,6 +21,10 @@
                         <li><button><h2>Outside</h2></button></li>
                         <li><button><h2>Configurator</h2></button></li>
                     </ul>
+                </section>
+
+                <section>
+                    <!--Second layer of buttons-->
 
                     <ul>
                         <!-- The Outside buttons will be visible by default-->
@@ -29,11 +34,21 @@
                         <li><button><h2>Reveal side 4</h2></button></li>
                         <li><button><h2>Reveal side 5</h2></button></li>
                         <li><button><h2>Reveal side 6</h2></button></li>
-                        <li><button><h2>Inside view</h2></button></li>
+                        <li><button onclick="reveal"><h2>Inside view</h2></button></li>
                         <!-- A toggle button-->
                         <li><button><h2>Show sizes</h2></button></li>
                     </ul>
 
+                    <ul class="hidden">
+                        <!-- configurator buttons not visible by default-->
+                        <li><button><h2>Top-down view</h2></button></li>
+                        <li><button><h2>Toggle size</h2></button></li>
+                        <li><button><h2>Show sizes</h2></button></li>
+                        <li><button><h2>Exit configurator</h2></button></li>
+                    </ul>
+                </section>
+
+                <section class="hidden">
                     <ul>
                         <!-- interior room buttons not visible by default-->
                         <li><button><h2>Living room</h2></button></li>
@@ -41,14 +56,8 @@
                         <li><button><h2>Single Bedroom</h2></button></li>
                         <li><button><h2>Double Bedroom</h2></button></li>
                     </ul>
+                </section>
 
-                    <ul>
-                        <!-- configurator buttons not visible by default-->
-                        <li><button><h2>Top-down view</h2></button></li>
-                        <li><button><h2>Toggle size</h2></button></li>
-                        <li><button><h2>Show sizes</h2></button></li>
-                        <li><button><h2>Exit configurator</h2></button></li>
-                    </ul>
             </section>
                 <section>
                     <img src="Images\22.jpg">
