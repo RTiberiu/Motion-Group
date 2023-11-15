@@ -18,8 +18,8 @@
                     <!-- This section holds all of the button lists-->
                     <ul>
                         <!-- The main buttons that will always be visible-->
-                        <li><button><h2>Outside</h2></button></li>
-                        <li><button><h2>Configurator</h2></button></li>
+                        <li><button onclick="goToOutside()" class="selected"><h2>Outside</h2></button></li>
+                        <li><button onclick="goToConfig()"><h2>Configurator</h2></button></li>
                     </ul>
                 </section>
 
@@ -39,7 +39,7 @@
                         <li><button><h2>Show sizes</h2></button></li>
                     </ul>
 
-                    <ul class="hidden">
+                    <ul class="smolhidden">
                         <!-- configurator buttons not visible by default-->
                         <li><button><h2>Top-down view</h2></button></li>
                         <li><button><h2>Toggle size</h2></button></li>
@@ -48,8 +48,8 @@
                     </ul>
                 </section>
 
-                <section class="hidden">
-                    <ul>
+                <section class="bighidden">
+                    <ul class="smolhidden">
                         <!-- interior room buttons not visible by default-->
                         <li><button><h2>Living room</h2></button></li>
                         <li><button><h2>Bathroom</h2></button></li>
@@ -58,8 +58,8 @@
                     </ul>
                 </section>
 
-            </section>
-                <section>
+            
+                <section class="container">
                     <img src="Images\22.jpg">
                     <!--Div to hold the interactive software-->
                 </section>
@@ -88,7 +88,9 @@
             </article>
         </div>
         <footer>
-            <a href="#">Link example</a>
+            <section class="right">
+                <a href="#">Link example</a>
+            </section>
         </footer>
     </body>
 </html>
