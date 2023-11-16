@@ -19,8 +19,8 @@
                     <!-- This section holds all of the button lists-->
                     <ul>
                         <!-- The main buttons that will always be visible-->
-                        <li><button onclick="switchCase(1)" class="selected"><h2>Outside</h2></button></li>
-                        <li><button onclick="switchCase(2)"><h2>Configurator</h2></button></li>
+                        <li><button id="1" class="selected" onclick="switchCase(1)"><h2>Outside</h2></button></li>
+                        <li><button id="2" class="unselected"onclick="switchCase(2)"><h2>Configurator</h2></button></li>
                     </ul>
                 </section>
 
@@ -29,33 +29,33 @@
 
                     <ul>
                         <!-- The Outside buttons will be visible by default-->
-                        <li><button onclick="switchCase(3)"><h2>Reveal side 1</h2></button></li>
-                        <li><button onclick="switchCase(4)"><h2>Reveal side 2</h2></button></li>
-                        <li><button onclick="switchCase(5)"><h2>Reveal side 3</h2></button></li>
-                        <li><button onclick="switchCase(6)"><h2>Reveal side 4</h2></button></li>
-                        <li><button onclick="switchCase(7)"><h2>Reveal side 5</h2></button></li>
-                        <li><button onclick="switchCase(8)"><h2>Reveal side 6</h2></button></li>
-                        <li><button onclick="switchCase(9)"><h2>Inside view</h2></button></li>
+                        <li><button id="3" onclick="switchCase(3)"><h2>Reveal side 1</h2></button></li>
+                        <li><button id="4" onclick="switchCase(4)"><h2>Reveal side 2</h2></button></li>
+                        <li><button id="5" onclick="switchCase(5)"><h2>Reveal side 3</h2></button></li>
+                        <li><button id="6" onclick="switchCase(6)"><h2>Reveal side 4</h2></button></li>
+                        <li><button id="7" onclick="switchCase(7)"><h2>Reveal side 5</h2></button></li>
+                        <li><button id="8" onclick="switchCase(8)"><h2>Reveal side 6</h2></button></li>
+                        <li><button id="9" onclick="switchCase(9)"><h2>Inside view</h2></button></li>
                         <!-- A toggle button-->
-                        <li><button onclick="switchCase(10)"><h2>Show sizes</h2></button></li>
+                        <li><button id="10" onclick="switchCase(10)"><h2>Show sizes</h2></button></li>
                     </ul>
 
-                    <ul class="smolhidden">
+                    <ul id="layer2List2" class="smolhidden">
                         <!-- configurator buttons not visible by default-->
-                        <li><button onclick="switchCase(11)"><h2>Top-down view</h2></button></li>
-                        <li><button onclick="switchCase(12)"><h2>Toggle size</h2></button></li>
-                        <li><button onclick="switchCase(13)"><h2>Show sizes</h2></button></li>
-                        <li><button onclick="switchCase(14)"><h2>Exit configurator</h2></button></li>
+                        <li><button id="11" onclick="switchCase(11)"><h2>Top-down view</h2></button></li>
+                        <li><button id="12" onclick="switchCase(12)"><h2>Toggle size</h2></button></li>
+                        <li><button id="13" onclick="switchCase(13)"><h2>Show sizes</h2></button></li>
+                        <li><button id="14" onclick="switchCase(14)"><h2>Exit configurator</h2></button></li>
                     </ul>
                 </section>
 
-                <section class="bighidden">
-                    <ul class="smolhidden">
+                <section id="layer3" class="bighidden">
+                    <ul id="layer3List" class="smolhidden">
                         <!-- interior room buttons not visible by default-->
-                        <li><button onclick="switchCase(15)"><h2>Living room</h2></button></li>
-                        <li><button onclick="switchCase(16)"><h2>Bathroom</h2></button></li>
-                        <li><button onclick="switchCase(17)"><h2>Single Bedroom</h2></button></li>
-                        <li><button onclick="switchCase(18)"><h2>Double Bedroom</h2></button></li>
+                        <li><button id="15" onclick="switchCase(15)"><h2>Living room</h2></button></li>
+                        <li><button id="16" onclick="switchCase(16)"><h2>Bathroom</h2></button></li>
+                        <li><button id="17" onclick="switchCase(17)"><h2>Single Bedroom</h2></button></li>
+                        <li><button id="18" onclick="switchCase(18)"><h2>Double Bedroom</h2></button></li>
                     </ul>
                 </section>
 
