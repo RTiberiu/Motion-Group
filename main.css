@@ -79,6 +79,9 @@ img{
 
 .right{float:right}
 
+.selectedTop{background-color: #233D1F;}
+.selectedMid{background-color: #233D1F;}
+.selectedBot{background-color: #233D1F;}
 .selected{background-color: #233D1F;}
 
 
