@@ -15,6 +15,11 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 const ambientLight = new THREE.AmbientLight()
 scene.add(ambientLight)
 
+// Add axis helper
+const axesHelper = new THREE.AxesHelper( 5 );
+scene.add( axesHelper );
+
+
 const renderer = new THREE.WebGL1Renderer();
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
@@ -87,7 +92,9 @@ function onMouseClick(event) {
             intersects[0].object.material = redMaterial; // Apply the red material
 
             uniqueElements.add(intersects[0].object.name);
-            console.log("Clicked Object: " + intersects[0].object.name);
+            console.log("Clicked Object name: " + intersects[0].object.name);
+            console.log(intersects[0].object);
+            console.log(intersects[0].object);
         }
     }
 }
@@ -96,8 +103,58 @@ function onMouseClick(event) {
 // Adding the font loader
 const fontLoader = new FontLoader();
 
-// Adding the text mesh
+// Adding the text material
 const textMaterial = new THREE.MeshBasicMaterial({color: 'red'});
+
+// Adding the text mesh
+let heightTextMesh = null;
+let widthTextMesh = null;
+function showDimensionsAtPosition(height, width, positionX, positionY, positionZ) {
+    fontLoader.load('../fonts/Montserrat Thin_Regular.json', function(font) {
+        const heightGeometry = new TextGeometry(height, {
+            font: font,
+            size: 30,
+            height: 5
+        });
+
+        const widthGeometry = new TextGeometry(width, {
+            font: font,
+            size: 30,
+            height: 5
+        });
+        
+        heightTextMesh = new THREE.Mesh(heightGeometry, textMaterial);
+        widthTextMesh = new THREE.Mesh(widthGeometry, textMaterial);
+
+        // Scale the mesh
+        let scale = .005;
+        heightTextMesh.scale.set(scale, scale, scale);
+        widthTextMesh.scale.set(scale, scale, scale);
+
+        // Offset the text position in the direction of the camera
+        const offsetDistance = -0.1;
+        const offsetVector = new THREE.Vector3(0, 0, offsetDistance);
+        const newPositionVector = new THREE.Vector3(positionX, positionY, positionZ);
+        const offsetPosition = new THREE.Vector3().copy(newPositionVector).add(offsetVector);
+        heightTextMesh.position.copy(offsetPosition);
+        
+        // Get wall dimensions
+        let boundingBox = new THREE.Box3().setFromObject(intersects[0].object);
+        console.log("boundingBox MAX: " + boundingBox.max.y + " boundingBox MIN: " + boundingBox.min.y);
+
+        // console.log("Text mesh position: X " + textMesh.position.x, " Y " + textMesh.position.y + " Z " + textMesh.position.z);
+
+        // Add text mesh to scene
+        scene.add(heightTextMesh);
+        scene.add(widthTextMesh);
+        // TODO Improve how the text mesh is getting created.
+        // TODO Properly remove the text when switching to another mesh.
+        // textMesh.position.set(interestedObject.position.x, interestedObject.position.y, interestedObject.position.z);
+        // TODO Get the correct position for the text.
+
+    })
+    
+}
 
 
 // Importing a 3D model
@@ -136,6 +193,12 @@ function animate() {
     
     // Add animations here
     controls.update(); // Update camera controls
+
+    // Make the text always face the camera
+    if (heightTextMesh != null && widthTextMesh != null) {
+        heightTextMesh.lookAt(camera.position);
+        widthTextMesh.lookAt(camera.position);
+    }
     
     // console.log(camera);
 
@@ -285,43 +348,35 @@ function showSizeOnElementHover() {
             let height = '3.60 m'; // Pull this info from a JSON database
             let width = '1.2 m'; // Pull this info from a JSON database
 
-            // Creating the text
-
+            // Main 
             if (!textIsDisplayed) { 
                 textIsDisplayed = true;
-                fontLoader.load('../fonts/Montserrat Thin_Regular.json', function(font) {
-                    const textGeometry = new TextGeometry("HELLO WORLD!", {
-                        font: font,
-                        size: 30,
-                        height: 5
-                    });
-                    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-
-                    // Text mesh settings
-                    let scale = .005;
-                    textMesh.scale.set(scale, scale, scale);
-                    console.log("Text mesh position: X " + textMesh.position.x, " Y " + textMesh.position.y + " Z " + textMesh.position.z);
-                    console.log("Intersected position: X " + interestedObject.position.x, " Y " + interestedObject.position.y + " Z " + interestedObject.position.z);
-                    
-                    // TODO Improve how the text mesh is getting created.
-                    // TODO Properly remove the text when switching to another mesh.
-                    // TODO Get the correct position for the text.
-                    textMesh.position.set(interestedObject.position.x, interestedObject.position.y, interestedObject.position.z);
-                    // Add mesh to scene
-                    scene.add(textMesh);
-                    console.log("Text mesh position: X " + textMesh.position.x, " Y " + textMesh.position.y + " Z " + textMesh.position.z);
-
-                    console.log(textGeometry)
-                })
+                // TODO Pass the object instead of the positions. 
+                    // I need the object to calculate the height of it. 
+                showDimensionsAtPosition(height, width, interestedObject.position.x, interestedObject.position.y, interestedObject.position.z);
+            
             }
-            
-
-
-            
 
         }
         
     }
+}
+
+function clearSpawnedText() {
+    if (heightTextMesh != null && widthTextMesh != null) {
+        scene.remove(heightTextMesh);
+        scene.remove(widthTextMesh);
+        // Dispose of the geometry and material after removing from the scene
+        heightTextMesh.geometry.dispose();
+        widthTextMesh.material.dispose();
+
+        // Set the reference to null to indicate that the text is no longer displayed
+        heightTextMesh = null;
+        widthTextMesh = null;
+        textIsDisplayed = false;
+
+    }
+    textIsDisplayed = false;
 }
     
 $('#Scene1').click(function() {
@@ -351,6 +406,7 @@ $('#sizeMode').click(function() {
     if (sizeMode) {
         window.addEventListener('mousemove', showSizeOnElementHover);
     } else {
+        clearSpawnedText();
         window.removeEventListener('mousemove', showSizeOnElementHover);
     }  
 });
