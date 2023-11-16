@@ -69,10 +69,10 @@ switch(layer){
         break;
 
     case 3:/*buttons 3-8 are different OUTSIDE views */
-        oldSelect=document.querySelector(".selected");
-        oldSelect.classList.toggle("selected");
+        oldSelect=document.querySelector(".selectedBot");
+        oldSelect.classList.toggle("selectedBot");
         newSelect=document.getElementById(cell);
-        newSelect.classList.toggle("selected");
+        newSelect.classList.toggle("selectedBot");
         break;
         
     case 4:
