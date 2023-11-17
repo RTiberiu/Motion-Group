@@ -109,7 +109,7 @@ const textMaterial = new THREE.MeshBasicMaterial({color: 'red'});
 // Adding the text mesh
 let heightTextMesh = null;
 let widthTextMesh = null;
-function showDimensionsAtPosition(height, width, positionX, positionY, positionZ) {
+function showDimensionsAtPosition(height, width, mainObject) {
     fontLoader.load('../fonts/Montserrat Thin_Regular.json', function(font) {
         const heightGeometry = new TextGeometry(height, {
             font: font,
@@ -130,19 +130,25 @@ function showDimensionsAtPosition(height, width, positionX, positionY, positionZ
         let scale = .005;
         heightTextMesh.scale.set(scale, scale, scale);
         widthTextMesh.scale.set(scale, scale, scale);
+    
+        // Calculate element height using its bounding box
+        console.log(mainObject);
+        // Get world position rather than location position of object
+        let objectPosition = mainObject.getWorldPosition(mainObject.position);
+        let boundingBox = new THREE.Box3().setFromObject(mainObject);
+        let objectHeight = boundingBox.max.y - boundingBox.min.y;
+        let objectWidth = boundingBox.max.x - boundingBox.min.x;
+        console.log("objectHeight: " + objectHeight);
+        console.log("objectWidth: " + objectWidth);
 
         // Offset the text position in the direction of the camera
-        const offsetDistance = -0.1;
-        const offsetVector = new THREE.Vector3(0, 0, offsetDistance);
-        const newPositionVector = new THREE.Vector3(positionX, positionY, positionZ);
-        const offsetPosition = new THREE.Vector3().copy(newPositionVector).add(offsetVector);
-        heightTextMesh.position.copy(offsetPosition);
-        
-        // Get wall dimensions
-        let boundingBox = new THREE.Box3().setFromObject(intersects[0].object);
-        console.log("boundingBox MAX: " + boundingBox.max.y + " boundingBox MIN: " + boundingBox.min.y);
+        const offsetHeight = 0.1;
+        const offsetWidth = 0.1;
 
-        // console.log("Text mesh position: X " + textMesh.position.x, " Y " + textMesh.position.y + " Z " + textMesh.position.z);
+        console.log('Object position. X: ' + objectPosition.x + " Y: " + objectPosition.y + " Z: " + objectPosition.z);
+        heightTextMesh.position.set(objectPosition.x, objectPosition.y + objectHeight / 2 + offsetHeight, objectPosition.z);
+        widthTextMesh.position.set(objectPosition.x + objectWidth / 2 + offsetWidth, objectPosition.y, objectPosition.z);
+      
 
         // Add text mesh to scene
         scene.add(heightTextMesh);
@@ -315,10 +321,14 @@ function animateCameraToPosition(position, meshNameToLookAt, duration) {
     cameraTimeline.play();
 }
 
-function isNamePresentInObjecct(name) {
+function isNamePresentInObject(name) {
     for (const key in hoverElements) {
       if (hoverElements[key].includes(name)) {
-        return key; 
+        let firstObject = hoverElements[key][0];
+        return {
+            "hoveredObject": key, 
+            "mainObject": firstObject
+        } 
       }
     }
     return null;
@@ -326,6 +336,7 @@ function isNamePresentInObjecct(name) {
   
 
 let textIsDisplayed = false;
+let textForElementName;
 function showSizeOnElementHover() {
     const mouse = new THREE.Vector2();
     mouse.x = mouseX;
@@ -338,25 +349,35 @@ function showSizeOnElementHover() {
     raycaster.intersectObjects(scene.children, true, intersects);
 
     if (intersects.length > 0) {
-        let interestedObject = intersects[0].object;
         let nameOfObject = intersects[0].object.name;
-        let hoveringOver = isNamePresentInObjecct(nameOfObject);
-        if (hoveringOver != null) {
+        let namePresentObject = isNamePresentInObject(nameOfObject);
+        
+        if (namePresentObject != null) {
+            let hoveringOver = namePresentObject.hoveredObject;
+            let mainObjectName = namePresentObject.mainObject;
             console.log('Hovering over ' + hoveringOver);
 
             // TODO Show dimensions on mesh;
             let height = '3.60 m'; // Pull this info from a JSON database
             let width = '1.2 m'; // Pull this info from a JSON database
-
-            // Main 
-            if (!textIsDisplayed) { 
-                textIsDisplayed = true;
-                // TODO Pass the object instead of the positions. 
-                    // I need the object to calculate the height of it. 
-                showDimensionsAtPosition(height, width, interestedObject.position.x, interestedObject.position.y, interestedObject.position.z);
             
+            // Show dimensions over the element 
+            if (!textIsDisplayed) { 
+                textForElementName = hoveringOver;
+                textIsDisplayed = true;
+                let mainObject = cabin.getObjectByName(mainObjectName);
+                
+                // Pass the main object and its dimensions
+                showDimensionsAtPosition(height, width, mainObject);
             }
 
+            // Reset text if hovering over another element
+            console.log("hoveringOver: " + hoveringOver + " textForElementName: " + textForElementName);
+            if (hoveringOver != textForElementName) {
+                console.log("Changed hovered element. Resetting text.")
+                textIsDisplayed = false;
+                clearSpawnedText();
+            } 
         }
         
     }
