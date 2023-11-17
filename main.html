@@ -20,8 +20,8 @@
                     <!-- This section holds all of the button lists-->
                     <ul>
                         <!-- The main buttons that will always be visible-->
-                        <li><button id="outside" class="selectedTop" onclick="switchCase(1,'outside')"><h2>Outside</h2></button></li>
-                        <li><button id="configurator" onclick="switchCase(1,'configurator')"><h2>Configurator</h2></button></li>
+                        <li><button id="outside" class="selectedTop" onclick="buttonAction('outside')"><h2>Outside</h2></button></li>
+                        <li><button id="configurator" onclick="buttonAction('configurator')"><h2>Configurator</h2></button></li>
                     </ul>
                 </section>
 
@@ -30,33 +30,33 @@
 
                     <ul id="layer2List1">
                         <!-- The Outside buttons will be visible by default-->
-                        <li><button id="side1" class="selectedMid" onclick="switchCase(2,'side1')"><h2>Reveal side 1</h2></button></li>
-                        <li><button id="side2" onclick="switchCase(2,'side2')"><h2>Reveal side 2</h2></button></li>
-                        <li><button id="side3" onclick="switchCase(2,'side3')"><h2>Reveal side 3</h2></button></li>
-                        <li><button id="side4" onclick="switchCase(2,'side4')"><h2>Reveal side 4</h2></button></li>
-                        <li><button id="side5" onclick="switchCase(2,'side5')"><h2>Reveal side 5</h2></button></li>
-                        <li><button id="side6" onclick="switchCase(2,'side6')"><h2>Reveal side 6</h2></button></li>
-                        <li><button id="inside" onclick="switchCase(2,'inside')"><h2>Inside view</h2></button></li>
+                        <li><button id="side1" class="selectedMid" onclick="buttonAction('side1')"><h2>Reveal side 1</h2></button></li>
+                        <li><button id="side2" onclick="buttonAction('side2')"><h2>Reveal side 2</h2></button></li>
+                        <li><button id="side3" onclick="buttonAction('side3')"><h2>Reveal side 3</h2></button></li>
+                        <li><button id="side4" onclick="buttonAction('side4')"><h2>Reveal side 4</h2></button></li>
+                        <li><button id="side5" onclick="buttonAction('side5')"><h2>Reveal side 5</h2></button></li>
+                        <li><button id="side6" onclick="buttonAction('side6')"><h2>Reveal side 6</h2></button></li>
+                        <li><button id="inside" onclick="buttonAction('inside')"><h2>Inside view</h2></button></li>
                         <!-- A toggle button-->
-                        <li><button id="show-size1" onclick="switchCase(4,'show-size1')"><h2>Show sizes</h2></button></li>
+                        <li><button id="show-size1" onclick="buttonAction('show-size1')"><h2>Show sizes</h2></button></li>
                     </ul>
 
                     <ul id="layer2List2" class="smolhidden">
                         <!-- configurator buttons not visible by default-->
-                        <li><button id="top-down" onclick="switchCase(2,'top-down')"><h2>Top-down view</h2></button></li>
-                        <li><button id="toggle-size" onclick="switchCase(2,'toggle-size')"><h2>Toggle size</h2></button></li>
-                        <li><button id="show-size2" onclick="switchCase(4,'show-size2')"><h2>Show sizes</h2></button></li>
-                        <li><button id="exit" onclick="switchCase(2,'exit')"><h2>Exit configurator</h2></button></li>
+                        <li><button id="top-down" onclick="buttonAction('top-down')"><h2>Top-down view</h2></button></li>
+                        <li><button id="toggle-size" onclick="buttonAction('toggle-size')"><h2>Toggle size</h2></button></li>
+                        <li><button id="show-size2" onclick="buttonAction('show-size2')"><h2>Show sizes</h2></button></li>
+                        <li><button id="exit" onclick="buttonAction('exit')"><h2>Exit configurator</h2></button></li>
                     </ul>
                 </section>
 
                 <section id="layer3" class="bighidden">
                     <ul id="layer3List" class="smolhidden">
                         <!-- interior room buttons not visible by default-->
-                        <li><button id="living" class="selectedBot" onclick="switchCase(3,'living')"><h2>Living room</h2></button></li>
-                        <li><button id="bath" onclick="switchCase(3,'bath')"><h2>Bathroom</h2></button></li>
-                        <li><button id="single" onclick="switchCase(3,'single')"><h2>Single Bedroom</h2></button></li>
-                        <li><button id="double" onclick="switchCase(3,'double')"><h2>Double Bedroom</h2></button></li>
+                        <li><button id="living" class="selectedBot" onclick="buttonAction('living')"><h2>Living room</h2></button></li>
+                        <li><button id="bath" onclick="buttonAction('bath')"><h2>Bathroom</h2></button></li>
+                        <li><button id="single" onclick="buttonAction('single')"><h2>Single Bedroom</h2></button></li>
+                        <li><button id="double" onclick="buttonAction('double')"><h2>Double Bedroom</h2></button></li>
                     </ul>
                 </section>
 
