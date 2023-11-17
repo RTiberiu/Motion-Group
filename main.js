@@ -1,5 +1,5 @@
 function buttonAction(cell){
-switch(layer){
+switch(cell){
 
     /*Top layer buttons */
     case "outside":
@@ -55,7 +55,7 @@ switch(layer){
         switchMid(cell);
         break;
 
-    case "show-size1": 
+    case "show-size2": 
         toggleSize(cell);
         break;
 
@@ -81,6 +81,7 @@ switch(layer){
         switchLow(cell);
         break;
     };
+    
 };
 
 function switchTop(cell){
@@ -100,7 +101,7 @@ function switchTop(cell){
 
         size=document.getElementById("show-size1");
         size.classList.remove("selected");
-        
+
         size=document.getElementById("show-size2");
         size.classList.remove("selected");
 
@@ -148,14 +149,12 @@ function switchMid(cell){
     newSelect.classList.toggle("selectedMid");
 
     if(cell =="inside"){
-        console.log("in if");
         showBig=document.getElementById("layer3");
         showBig.classList.remove("bighidden");
         showSmol=document.getElementById("layer3List");
         showSmol.classList.remove("smolhidden");
     }
     else{
-        console.log("in else");
         showBig=document.getElementById("layer3");
         showBig.classList.add("bighidden");
         showSmol=document.getElementById("layer3List");
