@@ -57,11 +57,14 @@ li{
 }
 
 /*Img/place holder*/
-img{
+.interior{
     width:100%;
 }
 .container{
     width:100%;
+}
+.info{
+    width:20%;
 }
 
 /*display options*/
