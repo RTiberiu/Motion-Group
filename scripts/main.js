@@ -114,27 +114,28 @@ function showDimensionsAtPosition(height, width, mainObject) {
         const heightGeometry = new TextGeometry(height, {
             font: font,
             size: 30,
-            height: 5
+            height: 30
         });
 
         const widthGeometry = new TextGeometry(width, {
             font: font,
             size: 30,
-            height: 5
+            height: 30
         });
         
         heightTextMesh = new THREE.Mesh(heightGeometry, textMaterial);
         widthTextMesh = new THREE.Mesh(widthGeometry, textMaterial);
 
         // Scale the mesh
-        let scale = .005;
+        let scale = .005; 
         heightTextMesh.scale.set(scale, scale, scale);
         widthTextMesh.scale.set(scale, scale, scale);
     
         // Calculate element height using its bounding box
         console.log(mainObject);
         // Get world position rather than location position of object
-        let objectPosition = mainObject.getWorldPosition(mainObject.position);
+        let objectPosition = new THREE.Vector3();
+        mainObject.getWorldPosition(objectPosition);
         let boundingBox = new THREE.Box3().setFromObject(mainObject);
         let objectHeight = boundingBox.max.y - boundingBox.min.y;
         let objectWidth = boundingBox.max.x - boundingBox.min.x;
@@ -142,12 +143,17 @@ function showDimensionsAtPosition(height, width, mainObject) {
         console.log("objectWidth: " + objectWidth);
 
         // Offset the text position in the direction of the camera
-        const offsetHeight = 0.1;
-        const offsetWidth = 0.1;
+        const offsetHeight = 0; //0.1;
+        const offsetWidth = 0.5;
 
+        // Text positions
+        let heightTextPosition = new THREE.Vector3(objectPosition.x, objectPosition.y + objectHeight + offsetHeight, objectPosition.z);
+        let widthTextPosition = new THREE.Vector3(objectPosition.x + offsetWidth, objectPosition.y, objectPosition.z);
+
+        // Set text positions to the text mesh
         console.log('Object position. X: ' + objectPosition.x + " Y: " + objectPosition.y + " Z: " + objectPosition.z);
-        heightTextMesh.position.set(objectPosition.x, objectPosition.y + objectHeight / 2 + offsetHeight, objectPosition.z);
-        widthTextMesh.position.set(objectPosition.x + objectWidth / 2 + offsetWidth, objectPosition.y, objectPosition.z);
+        heightTextMesh.position.set(heightTextPosition.x, heightTextPosition.y, heightTextPosition.z);
+        widthTextMesh.position.set(widthTextPosition.x, widthTextPosition.y, widthTextPosition.z);
       
 
         // Add text mesh to scene
@@ -167,6 +173,7 @@ function showDimensionsAtPosition(height, width, mainObject) {
 const loader = new GLTFLoader();
 let cabin;
 loader.load('../3d_models/beohus.gltf', function(gltf) {
+    console.log(gltf);
     cabin = gltf.scene;
 
     // cabin.scale.set(1, 1, 1);
@@ -175,13 +182,26 @@ loader.load('../3d_models/beohus.gltf', function(gltf) {
     
     scene.add(cabin);
 
-    // Add shadow for all the cabin's meshes
+    // Initial settings to the cabin
     cabin.traverse((child) => {
+        // Add shadow for all the cabin's meshes
         if (child.isMesh) {
             child.castShadow = true;
             child.receiveShadow = true;
+
+            // Hide configurator walls and placeholders
+            if (child.name.includes('wall_') || child.name.includes('placeholder_')) {
+                // Clone the material and apply it to mesh to avoid animating on shared material
+                let clonedMaterial = child.material.clone()
+                clonedMaterial.transparent = true;
+                child.material = clonedMaterial;
+                // Make the mesh transparent
+                child.material.opacity = 0;
+            }
         }
+
     });
+
 
     // Set the camera position
     camera.position.set(10.51637277396685, 6.694731096055621, -13.827832078903775);
@@ -215,11 +235,25 @@ animate();
 
 let cameraTimeline = gsap.timeline({paused: true});
 let animationTimelines = [];
-function animateElements(arrayOffElementNames, secondsToAnimate) {
+/**
+ * 
+ * @param {array} arrayOffElementNames array of elements in the format found in settings.json 
+ * @param {int} secondsToAnimate how many seconds for the animation to last
+ * @param {boolean} lowerElement true for lowering, false for rising the element
+ * @param {int} distance how far should the element move (from 1 to 10)
+ */
+function animateElements(arrayOffElementNames, secondsToAnimate, lowerElement, distance) {
+    let directionMultiplier;
+    if (lowerElement) {
+        directionMultiplier = -1;
+    } else {
+        directionMultiplier = 1;
+    }
+
     let localArrayOfElementNames = JSON.parse(JSON.stringify(arrayOffElementNames));
     function _animateObjectToTimeline(timeline, object, objectY, animationTime, delay) {
         timeline.to(object.position, {
-            y: objectY + 10,
+            y: (objectY + distance) * directionMultiplier,
             duration: animationTime,
             ease: "power1.inOut",
             yoyo: true,
@@ -241,30 +275,39 @@ function animateElements(arrayOffElementNames, secondsToAnimate) {
     let elementObjectY;
     let currentTimeline;
     let animationStyle;
+    let lastAnimationStyle;
     let animationDelay = 0;
     // Calculate how long each item should be animating for
     let totalItemsToAnimate = countTotalElementsOfArray(localArrayOfElementNames);
     let itemAnimationTime = secondsToAnimate / totalItemsToAnimate;
     console.log('Animating ', totalItemsToAnimate, ' each for ', itemAnimationTime);
     
-    localArrayOfElementNames.forEach((elementName, index) => {
-        if (Array.isArray(elementName)) {
+    localArrayOfElementNames.forEach((elementArray, indexSet) => {
+        if (Array.isArray(elementArray)) {
             // Add timeline for current array to the entire animation timelines
             currentTimeline = gsap.timeline({paused: true});
             animationTimelines.push(currentTimeline);
-            animationStyle = elementName.shift();
-            
+            animationStyle = elementArray.shift();
+        
             console.log('animationStyle ', animationStyle, ' animationDelay ', animationDelay)
-            elementName.forEach((elementName, index) => {
+            elementArray.forEach((elementName, index) => {
                 elementObject = cabin.getObjectByName(elementName);
                 elementObjectY = elementObject.position.y;
 
-                if (index == 0) {
+                
+                if (index == 0 && lastAnimationStyle == 'together' && animationStyle == 'together') {
+                    animationDelay = '+=' + (itemAnimationTime * 0.4);
+                } else if (index == 0 || animationStyle == 'together') {
                     animationDelay = '';
-                } else if (animationStyle == 'seperate') {
-                    animationDelay = '+=' + (itemAnimationTime * 0.1);
-                } else if (animationStyle == 'together') {
-                    animationDelay = 0
+                } else if (animationStyle == 'separate') {
+                    animationDelay = '+=' + (itemAnimationTime * 0.4);
+                } 
+
+                // Set the last used animation style 
+                console.log('Index ' + index + ' length ' + elementArray.length);
+                if (index == elementArray.length - 1) {
+                    console.log('Setting the lastAnimationStyle to: ' + animationStyle);
+                    lastAnimationStyle = animationStyle;
                 }
 
                 _animateObjectToTimeline(currentTimeline, elementObject, elementObjectY, itemAnimationTime, animationDelay);
@@ -284,7 +327,7 @@ function countTotalElementsOfArray(array) {
     let count = 0;
     array.forEach(item => {
         if (Array.isArray(item)) {
-            if (item[0] == 'seperate') {
+            if (item[0] == 'separate') {
                 count += countTotalElementsOfArray(item);
             } else if (item[0] == 'together') {
                 count++;
@@ -355,7 +398,7 @@ function showSizeOnElementHover() {
         if (namePresentObject != null) {
             let hoveringOver = namePresentObject.hoveredObject;
             let mainObjectName = namePresentObject.mainObject;
-            console.log('Hovering over ' + hoveringOver);
+            // console.log('Hovering over ' + hoveringOver);
 
             // TODO Show dimensions on mesh;
             let height = '3.60 m'; // Pull this info from a JSON database
@@ -372,7 +415,7 @@ function showSizeOnElementHover() {
             }
 
             // Reset text if hovering over another element
-            console.log("hoveringOver: " + hoveringOver + " textForElementName: " + textForElementName);
+            // console.log("hoveringOver: " + hoveringOver + " textForElementName: " + textForElementName);
             if (hoveringOver != textForElementName) {
                 console.log("Changed hovered element. Resetting text.")
                 textIsDisplayed = false;
@@ -403,18 +446,18 @@ function clearSpawnedText() {
 $('#Scene1').click(function() {
     console.log('Animating Scene1 ', cabin);
 
-    animateElements(settings.wallElementsNames1, 8);
+    animateElements(settings.wallElementsNames1, 8, false, 10);
     animateCameraToPosition(settings.doubleBedroomPosition, 'G-__560793', 8)
 });
 $('#Scene2').click(function() {
     console.log('Animating Scene2 ', cabin);
-    animateElements(settings.wallElementsNames2, 10);
+    animateElements(settings.wallElementsNames2, 10, false, 10);
 });
 $('#Scene3').click(function() {
     console.log('Anim length: ', animationTimelines.length)
     console.log('Animating Scene3 ', cabin);
     console.log(settings.roofElementsNames)
-    animateElements(settings.roofElementsNames, 5);
+    animateElements(settings.roofElementsNames, 5, false, 10);
     animateCameraToPosition(settings.topDownPosition, 'G-__559866', 5);
 });
 
@@ -480,3 +523,28 @@ $('#ResetTimeline').click(function() {
     animateCameraToPosition(settings.initialCameraPosition, 'skp2663_2', 5);
     
 });
+
+
+$('#configurator').click(function() {
+    let setAnimationDelay = 0;
+    // Animate camera
+    // animateCameraToPosition(settings.topDownLowerPosition, 'G-__559866', 3);
+
+    // Animate roof
+    animateElements(settings.roofElementsNames, 3, false, 10);
+
+    // Animate interior walls
+    setAnimationDelay += 3000;
+    setTimeout(() => {animateElements(settings.interiorWallls, 5, true, 4);}, setAnimationDelay);
+    
+    // Animate furniture
+    setAnimationDelay += 1000;
+    setTimeout(() => {animateElements(settings.furniture, 5, true, 2);}, setAnimationDelay);
+
+    // TODO Continue to get the furniture objects
+    // TODO Improve the animation
+        // Hint: The animation in reverse for some reason plays exactly as I want it to play normally
+        // I'm talking about the chain of animations.
+        // When going normal it's almost all at once, but when in reverse it actually chains nicely.
+});
+
