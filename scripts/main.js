@@ -243,6 +243,7 @@ let animationTimelines = [];
  * @param {int} distance how far should the element move (from 1 to 10)
  */
 function animateElements(arrayOffElementNames, secondsToAnimate, lowerElement, distance) {
+    // Decide if to animate the object up or down 
     let directionMultiplier;
     if (lowerElement) {
         directionMultiplier = -1;
@@ -251,12 +252,17 @@ function animateElements(arrayOffElementNames, secondsToAnimate, lowerElement, d
     }
 
     let localArrayOfElementNames = JSON.parse(JSON.stringify(arrayOffElementNames));
-    function _animateObjectToTimeline(timeline, object, objectY, animationTime, delay) {
+    function _animateObjectToTimeline(timeline, object, objectY, animationTime, delay, pause) {
+        // Add a pause
+        if (pause > 0) {
+            timeline.to(object.position, {}, '+=' + pause);
+        }
+
+        // Animate object position
         timeline.to(object.position, {
-            y: (objectY + distance) * directionMultiplier,
+            y: (distance) * directionMultiplier,
             duration: animationTime,
-            ease: "power1.inOut",
-            yoyo: true,
+            ease: "power1.inOut"
         }, delay);
         
         // Clone the material and apply it to mesh to avoid animating on shared material
@@ -277,50 +283,86 @@ function animateElements(arrayOffElementNames, secondsToAnimate, lowerElement, d
     let animationStyle;
     let lastAnimationStyle;
     let animationDelay = 0;
+    let pause;
     // Calculate how long each item should be animating for
     let totalItemsToAnimate = countTotalElementsOfArray(localArrayOfElementNames);
     let itemAnimationTime = secondsToAnimate / totalItemsToAnimate;
     console.log('Animating ', totalItemsToAnimate, ' each for ', itemAnimationTime);
     
+    // Loop though the array of arrays and create a timeline for each
     localArrayOfElementNames.forEach((elementArray, indexSet) => {
         if (Array.isArray(elementArray)) {
-            // Add timeline for current array to the entire animation timelines
-            currentTimeline = gsap.timeline({paused: true});
-            animationTimelines.push(currentTimeline);
+
             animationStyle = elementArray.shift();
+
+            // Code that reuses the same timeline if the animation style is "together" -- Not sure if this is the best idea. 
+            // if (lastAnimationStyle != null) {
+            //     if (!(lastAnimationStyle == 'together' && animationStyle == 'together')) {
+            //         console.log('Created a new timeline at index: ' + indexSet);
+            //         console.log("lastAnimationStyle: " + lastAnimationStyle + " animationStyle: " + animationStyle)
+            //         currentTimeline = gsap.timeline({paused: true});
+            //         animationTimelines.push(currentTimeline);
+            //     }
+            // } else {
+            //     console.log('Created a new timeline at index: ' + indexSet);
+            // }
+
+            if (animationStyle == 'together') {
+                currentTimeline = gsap.timeline({paused: true, stagger: 1});
+            } else {
+                currentTimeline = gsap.timeline({paused: true, stagger: .5});
+            }
+            animationTimelines.push(currentTimeline);
         
-            console.log('animationStyle ', animationStyle, ' animationDelay ', animationDelay)
+            // Loop over a single array and animate it depending on its settings
             elementArray.forEach((elementName, index) => {
                 elementObject = cabin.getObjectByName(elementName);
                 elementObjectY = elementObject.position.y;
 
                 
-                if (index == 0 && lastAnimationStyle == 'together' && animationStyle == 'together') {
-                    animationDelay = '+=' + (itemAnimationTime * 0.4);
-                } else if (index == 0 || animationStyle == 'together') {
-                    animationDelay = '';
-                } else if (animationStyle == 'separate') {
-                    animationDelay = '+=' + (itemAnimationTime * 0.4);
-                } 
+                console.log("Index : " + index + ' length: ' + (elementArray.length - 1));
+                let isLastIndex = index == elementArray.length - 1;
+                let isTogetherSequence = animationStyle == 'together' && lastAnimationStyle == 'together'
+
+
+                // if (isTogetherSequence) {
+                //     animationDelay = '-=' + (itemAnimationTime * 0.95);
+                // } else if (index == 0 || animationStyle == 'together') {
+                //     animationDelay = '';
+                // } else if (animationStyle == 'separate') {
+                //     console.log("Running separate");
+                //     animationDelay = '+=' + (itemAnimationTime * 0.1);
+                // }
+
+                // if ((index == 0 && isTogetherSequence)) {
+                //     pause = itemAnimationTime * 0.08;
+                //     animationDelay = '-=' + (itemAnimationTime * 0.95);
+                //     console.log("Adding pause of : " + pause);
+                // } else {
+                //     pause = 0;
+                // }
 
                 // Set the last used animation style 
-                console.log('Index ' + index + ' length ' + elementArray.length);
                 if (index == elementArray.length - 1) {
                     console.log('Setting the lastAnimationStyle to: ' + animationStyle);
                     lastAnimationStyle = animationStyle;
                 }
 
-                _animateObjectToTimeline(currentTimeline, elementObject, elementObjectY, itemAnimationTime, animationDelay);
+                // For testing
+                pause = 0;
+                _animateObjectToTimeline(currentTimeline, elementObject, elementObjectY, itemAnimationTime, animationDelay, pause);
             })
+
+            currentTimeline.play();
         }
     });
 
     console.log('Timelines : ', animationTimelines.length);
     // Play all animations
-    animationTimelines.forEach(timeline => {
-        console.log('Started an animation timeline.')
-        timeline.play();
-    })
+    // animationTimelines.forEach(timeline => {
+    //     console.log('Started an animation timeline.')
+    //     timeline.play();
+    // })
 }
 
 function countTotalElementsOfArray(array) {
@@ -525,6 +567,13 @@ $('#ResetTimeline').click(function() {
 });
 
 
+
+$('#resetFurniture').click(function() {
+    for (let index = animationTimelines.length - 1; index >= 0; index--) {
+        reverseTimelineAtIndex(animationTimelines.length - 1);
+    }
+});
+
 $('#configurator').click(function() {
     let setAnimationDelay = 0;
     // Animate camera
@@ -548,3 +597,13 @@ $('#configurator').click(function() {
         // When going normal it's almost all at once, but when in reverse it actually chains nicely.
 });
 
+
+$('#furniture').click(function() {
+    animateElements(settings.roofElementsNames, 0, false, 10);
+    animateCameraToPosition(settings.topDownLowerPosition, 'G-__559866', 0);
+    // animateElements(settings.interiorWallls, .1, false, 5);
+    console.log("Animating WALLA NOW:")
+    animateElements(settings.interiorWallls, 5, true, 7)
+    
+    setTimeout(() => {animateElements(settings.furniture, 5, true, 4);}, 3000);
+});
