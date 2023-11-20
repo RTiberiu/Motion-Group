@@ -6,8 +6,6 @@ Quick rules:
 */
 
 /*Text*/
-
-/*ToDo fix sizes to comply with style guide*/
 h1{
     font-family: Arial, Helvetica, sans-serif;
     color:#FFFFFF;
@@ -27,6 +25,7 @@ footer p{
 footer a{
     color: #233D1F;
 }
+
 /*
 Must use Monument Extended for oversized headings and large display text
 Must use Helvetica for Document headings, body copy and annotations
@@ -114,6 +113,10 @@ li{
 body{
     background-color: #8d9b90;
     margin:0;
+}
+nav{
+    background-color: #8D9B90;
+    padding:5px;
 }
 body div{
     background-color: #8D9B90;
