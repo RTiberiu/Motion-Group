@@ -70,11 +70,28 @@ window.addEventListener('mousemove', (event) => {
 
 window.addEventListener('keydown', onMouseClick);
 
-const redMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+/**
+ * Create a basic mesh material.
+ * @param {string} color hex value representing the material's color
+ * @returns Three js mesh material
+ */
+function createBasicMaterialWithColor(color) {
+    let hexColor = parseInt(color, 16);
+    let material = new THREE.MeshBasicMaterial({color: hexColor, roughness: 0.5, metalness: 0.5});
+    material.castShadow = true;
+    material.receiveShadow = true;
+    return material;
+}
+
+// Create testing materials
+const redMaterial = createBasicMaterialWithColor('ff0000');
+const orangeMaterial = createBasicMaterialWithColor('ff6900');
+
+
 function onMouseClick(event) {
-    console.log(event.key)
-    console.log(event.key.toLowerCase())
-    console.log(event.key.toLowerCase() == 'a')
+    // console.log(event.key)
+    // console.log(event.key.toLowerCase())
+    // console.log(event.key.toLowerCase() == 'a')
     if(event.key.toLowerCase() == 'a') {
         // Calculate mouse position
         const mouse = new THREE.Vector2();
@@ -168,11 +185,21 @@ function showDimensionsAtPosition(height, width, mainObject) {
     
 }
 
+// Configurator mode
+let isConfiguratorMode = false;
+
+// Storing configurator components
+let configPlaceholders = [["together"]];
+let configWalls = [["together"]];
+let originalWallPosition;
+let newWallPosition;
+let placeholderHeight;
+let originalPlaceholderPosition;
 
 // Importing a 3D model
 const loader = new GLTFLoader();
 let cabin;
-loader.load('../3d_models/beohus.gltf', function(gltf) {
+loader.load('../3d_models/beohusconfig_04.gltf', function(gltf) {
     console.log(gltf);
     cabin = gltf.scene;
 
@@ -191,12 +218,35 @@ loader.load('../3d_models/beohus.gltf', function(gltf) {
 
             // Hide configurator walls and placeholders
             if (child.name.includes('wall_') || child.name.includes('placeholder_')) {
+                console.log("Hiding configuration walls!");
                 // Clone the material and apply it to mesh to avoid animating on shared material
                 let clonedMaterial = child.material.clone()
                 clonedMaterial.transparent = true;
                 child.material = clonedMaterial;
                 // Make the mesh transparent
                 child.material.opacity = 0;
+
+                // Store mesh names into arrays
+                let boundingBox = new THREE.Box3().setFromObject(child);
+                let objectHeight = boundingBox.max.y - boundingBox.min.y;
+                if (child.name.includes('wall_')) {
+                    configWalls[0].push(child.name);
+                    // Store original wall position
+                    if (originalWallPosition == null) {
+                        originalWallPosition = child.position.y;
+                    }
+                    // Move walls underneath the cabin
+                    newWallPosition = child.position.y - objectHeight - 0.2;
+                    child.position.y = newWallPosition;
+                } else if (child.name.includes('placeholder_')) {
+                    configPlaceholders[0].push(child.name);
+                    placeholderHeight = objectHeight;
+
+                    // Store original placeholder position
+                    if (originalPlaceholderPosition == null) {
+                        originalPlaceholderPosition = child.position.y;
+                    }
+                }
             }
         }
 
@@ -241,8 +291,9 @@ let animationTimelines = [];
  * @param {int} secondsToAnimate how many seconds for the animation to last
  * @param {boolean} lowerElement true for lowering, false for rising the element
  * @param {int} distance how far should the element move (from 1 to 10)
+ * @param {boolean} storeTimeline decide to store the timeline that will be reversed later
  */
-function animateElements(arrayOffElementNames, secondsToAnimate, lowerElement, distance) {
+function animateElements(arrayOffElementNames, secondsToAnimate, lowerElement, distance, makeVisibile, storeTimeline) {
     // Decide if to animate the object up or down 
     let directionMultiplier;
     if (lowerElement) {
@@ -251,14 +302,31 @@ function animateElements(arrayOffElementNames, secondsToAnimate, lowerElement, d
         directionMultiplier = 1;
     }
 
+    // Decide to animate the object to visible or invisible
+    let animateToOpacity;
+    if (makeVisibile) {
+        animateToOpacity = 1;
+    } else {
+        animateToOpacity = 0;
+    }
+
     let localArrayOfElementNames = JSON.parse(JSON.stringify(arrayOffElementNames));
-    function _animateObjectToTimeline(timeline, object, objectY, animationTime, delay) {
-        // Animate object position
-        timeline.to(object.position, {
-            y: (distance) * directionMultiplier,
-            duration: animationTime,
-            ease: "power1.inOut"
-        }, delay);
+    function _animateObjectToTimeline(timeline, object, objectY, animationTime, delayAnimation) {
+        if (delayAnimation) {
+            // Animate object position
+            timeline.to(object.position, {
+                y: (distance) * directionMultiplier,
+                duration: animationTime,
+                ease: "power3.in"
+            });
+        } else {
+            // Animate object position
+            timeline.to(object.position, {
+                y: (distance) * directionMultiplier,
+                duration: animationTime,
+                ease: "power3.in"
+            }, '');
+        }
         
         // Clone the material and apply it to mesh to avoid animating on shared material
         let clonedMaterial = object.material.clone()
@@ -266,9 +334,9 @@ function animateElements(arrayOffElementNames, secondsToAnimate, lowerElement, d
         object.material = clonedMaterial;
         
         timeline.to(clonedMaterial, {
-            opacity: 0,
+            opacity: animateToOpacity,
             duration: animationTime,
-            ease: "power1.inOut",
+            ease: "power3.in",
         }, '-=' + (animationTime));
     }
     
@@ -281,27 +349,23 @@ function animateElements(arrayOffElementNames, secondsToAnimate, lowerElement, d
     
     // Calculate how long each item should be animating for
     let totalItemsToAnimate = countTotalElementsOfArray(localArrayOfElementNames);
-    let animStagger = secondsToAnimate / totalItemsToAnimate;
-    // let itemAnimationTime = secondsToAnimate / totalItemsToAnimate;
+    // let animStagger = secondsToAnimate / totalItemsToAnimate;
+    let itemAnimationTime = secondsToAnimate / totalItemsToAnimate;
+    let animStagger = 1;
     
-    // TODO Tweak the itemAnimationTime and the stagger.
-        // The animation properly runs in the sequence I want now. 
-    // TODO Fix separate anim, so that it suns in the sequence I want.
     let mainTimeline = gsap.timeline({paused: true, stagger: animStagger});
     // Loop though the array of arrays and create a timeline for each
     localArrayOfElementNames.forEach((elementArray, indexSet) => {
         if (Array.isArray(elementArray)) {
             
             animationStyle = elementArray.shift();
-            let itemAnimationTime = secondsToAnimate - (animStagger * indexSet);
-
+            // let itemAnimationTime = secondsToAnimate - (animStagger * indexSet + 1);
             if (animationStyle == 'together') {
-                currentTimeline = gsap.timeline({paused: false});
-                animationDelay = '';
-                // animationDelay = '-=' + itemAnimationTime;
+                currentTimeline = gsap.timeline({paused: false, stagger: 0});
+                animationDelay = false;
             } else if (animationStyle == 'separate') {
                 currentTimeline = gsap.timeline({paused: false, stagger: animStagger});
-                animationDelay = '';
+                animationDelay = true;
             }
             
             // Loop over a single array and animate it depending on its settings
@@ -309,18 +373,17 @@ function animateElements(arrayOffElementNames, secondsToAnimate, lowerElement, d
                 elementObject = cabin.getObjectByName(elementName);
                 elementObjectY = elementObject.position.y;
                 _animateObjectToTimeline(currentTimeline, elementObject, elementObjectY, itemAnimationTime, animationDelay);
-                
-                // Add to maintimeline
-            })
-            mainTimeline.add(currentTimeline);
+            });
             
+            // Add to maintimeline
+            mainTimeline.add(currentTimeline);
         }
     });
-    
-    console.log(mainTimeline);
-    animationTimelines.push(mainTimeline);
+    // Store timeline for reversing later
+    if (storeTimeline) animationTimelines.push(mainTimeline);
+
+    // Play maintimeline
     mainTimeline.play();
-    console.log('Timelines : ', animationTimelines.length);
 }
 
 function countTotalElementsOfArray(array) {
@@ -446,18 +509,18 @@ function clearSpawnedText() {
 $('#Scene1').click(function() {
     console.log('Animating Scene1 ', cabin);
 
-    animateElements(settings.wallElementsNames1, 8, false, 10);
+    animateElements(settings.wallElementsNames1, 6, false, 10, false, true);
     animateCameraToPosition(settings.doubleBedroomPosition, 'G-__560793', 8)
 });
 $('#Scene2').click(function() {
     console.log('Animating Scene2 ', cabin);
-    animateElements(settings.wallElementsNames2, 10, false, 10);
+    animateElements(settings.wallElementsNames2, 10, false, 10, false, true);
 });
 $('#Scene3').click(function() {
     console.log('Anim length: ', animationTimelines.length)
     console.log('Animating Scene3 ', cabin);
     console.log(settings.roofElementsNames)
-    animateElements(settings.roofElementsNames, 5, false, 10);
+    animateElements(settings.roofElementsNames, 5, false, 10, false, true);
     animateCameraToPosition(settings.topDownPosition, 'G-__559866', 5);
 });
 
@@ -502,23 +565,28 @@ $('#getCamera').click(function() {
     console.log(camera.getWorldPosition);
 });
 
-function reverseTimelineAtIndex(index) {
+/**
+ * Reverse all the timelines stored in animationTimelines.
+ * @param {int} index Index of the timeline in the array to reverse
+ * @param {int} speedMultiplier How much faster should the timeline reverse
+ */
+function reverseTimelineAtIndex(index, speedMultiplier) {
     if (index >= 0) {
         const timeline = animationTimelines[index];
         timeline.eventCallback("onReverseComplete", function() {
             if (index === 0) {
                 animationTimelines = [];
             } else {
-                reverseTimelineAtIndex(index - 1);
+                reverseTimelineAtIndex(index - 1, speedMultiplier);
             }
         });
-        timeline.reverse();
+        timeline.timeScale(speedMultiplier).reverse();
     }
 }
 
 $('#ResetTimeline').click(function() {
     for (let index = animationTimelines.length - 1; index >= 0; index--) {
-        reverseTimelineAtIndex(animationTimelines.length - 1);
+        reverseTimelineAtIndex(animationTimelines.length - 1, 2);
     }
     animateCameraToPosition(settings.initialCameraPosition, 'skp2663_2', 5);
     
@@ -528,40 +596,211 @@ $('#ResetTimeline').click(function() {
 
 $('#resetFurniture').click(function() {
     for (let index = animationTimelines.length - 1; index >= 0; index--) {
-        reverseTimelineAtIndex(animationTimelines.length - 1);
+        reverseTimelineAtIndex(animationTimelines.length - 1, 2);
     }
 });
 
 $('#configurator').click(function() {
-    let setAnimationDelay = 0;
-    // Animate camera
-    // animateCameraToPosition(settings.topDownLowerPosition, 'G-__559866', 3);
+    // Toggle configurator mode
+    if (!isConfiguratorMode) isConfiguratorMode = true;
+    else isConfiguratorMode = false;
 
-    // Animate roof
-    animateElements(settings.roofElementsNames, 3, false, 10);
+    if (isConfiguratorMode) {
+        // Show configurator
+        initializeConfigurator(true);
+        // Adding mouse events
+        window.addEventListener('mousemove', hoverInConfiguratorMode);
+        window.addEventListener('click', clickInConfiguratorMode);
+    } else {
+        // Hide configurator
+        initializeConfigurator(false);
 
-    // Animate interior walls
-    setAnimationDelay += 3000;
-    setTimeout(() => {animateElements(settings.interiorWallls, 5, true, 4);}, setAnimationDelay);
-    
-    // Animate furniture
-    setAnimationDelay += 1000;
-    setTimeout(() => {animateElements(settings.furniture, 5, true, 2);}, setAnimationDelay);
+        // Removing mouse events
+        window.removeEventListener('mousemove', hoverInConfiguratorMode);
+        window.removeEventListener('click', clickInConfiguratorMode);
+    }
 
-    // TODO Continue to get the furniture objects
-    // TODO Improve the animation
-        // Hint: The animation in reverse for some reason plays exactly as I want it to play normally
-        // I'm talking about the chain of animations.
-        // When going normal it's almost all at once, but when in reverse it actually chains nicely.
 });
+
+/**
+ * Support function to animate the configurator on/off
+ * @param {boolean} showConfigurator animate the cabin items and show configurator 
+ */
+function initializeConfigurator(showConfigurator) {
+    let setAnimationDelay = 0;
+    if (showConfigurator) {
+        // Animate camera
+        animateCameraToPosition(settings.topDownSidePosition, 'G-__559866', 6);
+        setTimeout(() => {animateCameraToPosition(settings.topDownLowerPosition, 'G-__559866', 4);}, 7500);
+    
+        // Animate roof
+        animateElements(settings.roofElementsNames, 5, false, 8, false, true);
+    
+        // Animate interior walls
+        setAnimationDelay += 4000;
+        setTimeout(() => {animateElements(settings.interiorWallls, 5, true, 7, false, true);}, setAnimationDelay);
+        
+        // Animate furniture
+        setAnimationDelay += 2000;
+        setTimeout(() => {animateElements(settings.furniture, 5, true, 2, false, true);}, setAnimationDelay);
+        setTimeout(() => {animateElements(settings.furnitureTwo, 5, true, 2, false, true);}, setAnimationDelay);
+        setTimeout(() => {animateElements(settings.furnitureThree, 5, true, 2, false, true);}, setAnimationDelay);
+    
+        // Show placeholders
+        setAnimationDelay += 5000;
+        let placeHolderPosition = originalPlaceholderPosition + placeholderHeight;
+        setTimeout(() => {animateElements(configPlaceholders, 2, true, -placeHolderPosition, true, true)}, setAnimationDelay);
+    } else {
+        animateElements(configPlaceholders, .5, true, 10, false, false);
+        animateElements(configWalls, .5, true, 10, false, false);
+
+        animateCameraToPosition(settings.topDownSidePosition, 'G-__559866', 7);
+        animateCameraToPosition(settings.initialCameraPosition, 'G-__559866', 3);
+        console.log("Anim length: " + animationTimelines.length);
+
+        for (let index = animationTimelines.length - 1; index >= 0; index--) {
+            reverseTimelineAtIndex(animationTimelines.length - 1, 3);
+        }
+    }
+}
+
+// TODO Add hover for the wall and store that value, so that I can despawn the wall.
+let originalPlaceholderMaterial;
+let originalWallMaterial;
+let currentHoveredPlaceholder;
+let currentHoveredWall;
+function hoverInConfiguratorMode() {
+    const mouse = new THREE.Vector2();
+    mouse.x = mouseX;
+    mouse.y = mouseY;
+
+    // Update the raycaster with the mouse position
+    raycaster.setFromCamera(mouse, camera);
+
+    intersects.length = 0;
+    raycaster.intersectObjects(scene.children, true, intersects);
+
+    // Check if it intersects with anything
+    if (intersects.length > 0) {
+        let intersectedObject = intersects[0].object;
+        let nameOfIntersectObject = intersectedObject.name;
+
+        // Check if it intersects with a placeholder
+        if (nameOfIntersectObject.includes('placeholder_')) {
+            console.log("Hovering over placeholder: " + nameOfIntersectObject)
+            if (currentHoveredPlaceholder != null && currentHoveredPlaceholder != intersectedObject) {
+                // Restore material to previous item
+                currentHoveredPlaceholder.material = originalPlaceholderMaterial;
+                currentHoveredPlaceholder.transparent = false;
+            }
+            
+            // Store the original material
+            if (currentHoveredPlaceholder != intersectedObject && originalPlaceholderMaterial != intersectedObject.material) {
+                originalPlaceholderMaterial = intersectedObject.material.clone();
+                originalPlaceholderMaterial.transparent = true;
+            } 
+
+            // Store the current hovered placeholder name
+            currentHoveredPlaceholder = intersectedObject;
+
+            // Change color of hovered placeholder
+            intersectedObject.material = orangeMaterial;
+        } else {
+            console.log("Else placeholder");
+            // Restore original material
+            if (originalPlaceholderMaterial != null && currentHoveredPlaceholder != null) {
+                console.log("Restored material for " + currentHoveredPlaceholder.name);
+                currentHoveredPlaceholder.material = originalPlaceholderMaterial;
+                currentHoveredPlaceholder.transparent = false;
+                currentHoveredPlaceholder = null;
+            }
+        }
+
+        // Check if it intersects with a wall
+        if (nameOfIntersectObject.includes('wall_')) {
+            console.log("Hovering over wall: " + nameOfIntersectObject)
+            if (currentHoveredWall != null && currentHoveredWall != intersectedObject) {
+                // Restore material to previous item
+                currentHoveredWall.material = originalWallMaterial;
+                currentHoveredWall.transparent = false;
+            }
+            
+            // Store the original material
+            if (currentHoveredWall != intersectedObject && originalWallMaterial != intersectedObject.material) {
+                originalWallMaterial = intersectedObject.material.clone();
+                originalWallMaterial.transparent = true;
+            } 
+
+            // Store the current hovered placeholder name
+            currentHoveredWall = intersectedObject;
+
+            // Change color of hovered placeholder
+            intersectedObject.material = orangeMaterial;
+        } else {
+            console.log("Else wall");
+            // Restore original material
+            if (originalWallMaterial != null && currentHoveredWall != null) {
+                console.log("Restored material for " + currentHoveredWall.name);
+                currentHoveredWall.material = originalWallMaterial;
+                currentHoveredWall.transparent = false;
+                currentHoveredWall = null;
+            }
+        }
+        
+    } 
+}
+
+function clickInConfiguratorMode() {
+    // Continue if there's a hovered placeholder
+    if (currentHoveredPlaceholder != null) {
+        let extractedId = extractIdFromName(currentHoveredPlaceholder.name);
+
+        // Spawn wall with matching id
+        if (extractedId != null) {
+            let wallId = 'wall' + extractedId;
+            animateElements([['together', currentHoveredPlaceholder.name]], .5, true, originalPlaceholderPosition-placeholderHeight, false, false);
+            animateElements([['together', wallId]], .5, false, originalWallPosition, true, false);
+        }
+    // Continue if there's a hovered wall
+    } else if (currentHoveredWall != null) {
+        // Despawn wall
+        let extractedId = extractIdFromName(currentHoveredWall.name);
+        if (extractedId != null) {
+            let placeholderId = 'placeholder' + extractedId;
+            animateElements([['together', placeholderId]], .5, false, originalPlaceholderPosition+placeholderHeight, true, false);
+            animateElements([['together', currentHoveredWall.name]], .5, true, newWallPosition, false, false);
+        }
+    }
+}
+
+// Helped function to extract the id from a name -- from wall_10, to _10
+function extractIdFromName(name) {
+    let regex = /_(\d+)/;
+    let idMatch = regex.exec(name);
+    let extractedId = idMatch ? idMatch[0] : null;
+    return extractedId;
+}
+
 
 
 $('#furniture').click(function() {
-    animateElements(settings.roofElementsNames, 0, false, 10);
-    animateCameraToPosition(settings.topDownLowerPosition, 'G-__559866', 0);
+    animateElements(settings.roofElementsNames, 0, false, 10, false);
+    animateCameraToPosition(settings.topDownSidePosition, 'G-__559866', 0);
     // animateElements(settings.interiorWallls, .1, false, 5);
     console.log("Animating WALLA NOW:")
-    animateElements(settings.interiorWallls, 5, true, 7)
+    // 5 sec
+    animateElements(settings.interiorWallls, 0, true, 7, false)
     
-    setTimeout(() => {animateElements(settings.furniture, 5, true, 4);}, 3000);
+    // 5 sec -- 3000 delay
+    setTimeout(() => {animateElements(settings.furniture, 0, true, 4, false);}, 0);
+
+    
+    console.log('Animating config placeholders.')
+    console.log(configPlaceholders);
+    console.log("type configplaceholders: " + typeof configPlaceholders + " type settings: " + typeof settings.furniture);
+
+    // Get a placeholders position
+    let placeHolderPosition = cabin.getObjectByName(configPlaceholders[0][1]).position.y;
+    let wallPosition = cabin.getObjectByName(configWalls[0][1]).position.y;
+    setTimeout(() => {animateElements(configPlaceholders, 2, true, -placeHolderPosition, true)}, 500);
 });
