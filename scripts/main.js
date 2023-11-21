@@ -6,12 +6,13 @@ import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import gsap from 'gsap';
 import settings from '../settings.json';
 
+// Create the basic scene
 gsap.registerPlugin();
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x323230);
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 1000);
 
-
+// Add an ambient light to the scene
 const ambientLight = new THREE.AmbientLight()
 scene.add(ambientLight)
 
@@ -19,7 +20,7 @@ scene.add(ambientLight)
 const axesHelper = new THREE.AxesHelper( 5 );
 scene.add( axesHelper );
 
-
+// Create the renderer and append it to the container
 const renderer = new THREE.WebGL1Renderer();
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
@@ -39,26 +40,27 @@ directionalLight.shadow.camera.top = 5;
 directionalLight.shadow.camera.bottom = -5;
 scene.add(directionalLight); 
 
+// Create the user controls
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true; // Adds a damping effect to smooth camera movements
-controls.dampingFactor = 0.05; // Adjust the damping factor as needed
-controls.rotateSpeed = 0.5; // Adjust the rotation speed as needed
+controls.enableDamping = true;
+controls.dampingFactor = 0.05; 
+controls.rotateSpeed = 0.5;
 
-
+// Set the camera position
 camera.position.z = 5;
 
+// Toggle for displaying the size or not on click
 let sizeMode = false;
 
 // Loading elements that trigger the size show when hoevered
 let hoverElements = settings.hoverElements;
-
 
 // Create a raycaster and an array to store the intersected objects
 const raycaster = new THREE.Raycaster();
 const intersects = [];
 let uniqueElements = new Set();
 
-
+// Storing current mouse positions
 let mouseX = 0;
 let mouseY = 0;
 
@@ -68,7 +70,21 @@ window.addEventListener('mousemove', (event) => {
     mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
 });
 
+// Add event listener for button presses (used for testing) 
 window.addEventListener('keydown', onMouseClick);
+
+// Function to handle window resize
+function onWindowResize() {
+    // Update the camera aspect ratio
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    // Update the renderer size
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// Add event listener for window resize
+window.addEventListener('resize', onWindowResize);
 
 /**
  * Create a basic mesh material.
@@ -77,7 +93,7 @@ window.addEventListener('keydown', onMouseClick);
  */
 function createBasicMaterialWithColor(color) {
     let hexColor = parseInt(color, 16);
-    let material = new THREE.MeshBasicMaterial({color: hexColor, roughness: 0.5, metalness: 0.5});
+    let material = new THREE.MeshBasicMaterial({color: hexColor});
     material.castShadow = true;
     material.receiveShadow = true;
     return material;
@@ -87,11 +103,7 @@ function createBasicMaterialWithColor(color) {
 const redMaterial = createBasicMaterialWithColor('ff0000');
 const orangeMaterial = createBasicMaterialWithColor('ff6900');
 
-
 function onMouseClick(event) {
-    // console.log(event.key)
-    // console.log(event.key.toLowerCase())
-    // console.log(event.key.toLowerCase() == 'a')
     if(event.key.toLowerCase() == 'a') {
         // Calculate mouse position
         const mouse = new THREE.Vector2();
@@ -196,72 +208,71 @@ let newWallPosition;
 let placeholderHeight;
 let originalPlaceholderPosition;
 
-// Importing a 3D model
+// Importing the 3D model for the cabin
 const loader = new GLTFLoader();
 let cabin;
-loader.load('../3d_models/beohusconfig_04.gltf', function(gltf) {
-    console.log(gltf);
-    cabin = gltf.scene;
 
-    // cabin.scale.set(1, 1, 1);
-
-    console.log(cabin);
+function importCabinModel() {
+    loader.load('../3d_models/beohusconfig_04.gltf', function(gltf) {
+        console.log(gltf);
+        cabin = gltf.scene;
+        console.log(cabin);
+        
+        scene.add(cabin);
     
-    scene.add(cabin);
-
-    // Initial settings to the cabin
-    cabin.traverse((child) => {
-        // Add shadow for all the cabin's meshes
-        if (child.isMesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-
-            // Hide configurator walls and placeholders
-            if (child.name.includes('wall_') || child.name.includes('placeholder_')) {
-                console.log("Hiding configuration walls!");
-                // Clone the material and apply it to mesh to avoid animating on shared material
-                let clonedMaterial = child.material.clone()
-                clonedMaterial.transparent = true;
-                child.material = clonedMaterial;
-                // Make the mesh transparent
-                child.material.opacity = 0;
-
-                // Store mesh names into arrays
-                let boundingBox = new THREE.Box3().setFromObject(child);
-                let objectHeight = boundingBox.max.y - boundingBox.min.y;
-                if (child.name.includes('wall_')) {
-                    configWalls[0].push(child.name);
-                    // Store original wall position
-                    if (originalWallPosition == null) {
-                        originalWallPosition = child.position.y;
-                    }
-                    // Move walls underneath the cabin
-                    newWallPosition = child.position.y - objectHeight - 0.2;
-                    child.position.y = newWallPosition;
-                } else if (child.name.includes('placeholder_')) {
-                    configPlaceholders[0].push(child.name);
-                    placeholderHeight = objectHeight;
-
-                    // Store original placeholder position
-                    if (originalPlaceholderPosition == null) {
-                        originalPlaceholderPosition = child.position.y;
+        // Initial settings to the cabin
+        cabin.traverse((child) => {
+            // Add shadow for all the cabin's meshes
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+    
+                // Hide configurator walls and placeholders
+                if (child.name.includes('wall_') || child.name.includes('placeholder_')) {
+                    console.log("Hiding configuration walls!");
+                    // Clone the material and apply it to mesh to avoid animating on shared material
+                    let clonedMaterial = child.material.clone()
+                    clonedMaterial.transparent = true;
+                    child.material = clonedMaterial;
+                    // Make the mesh transparent
+                    child.material.opacity = 0;
+    
+                    // Store mesh names into arrays
+                    let boundingBox = new THREE.Box3().setFromObject(child);
+                    let objectHeight = boundingBox.max.y - boundingBox.min.y;
+                    if (child.name.includes('wall_')) {
+                        configWalls[0].push(child.name);
+                        // Store original wall position
+                        if (originalWallPosition == null) {
+                            originalWallPosition = child.position.y;
+                        }
+                        // Move walls underneath the cabin
+                        newWallPosition = child.position.y - objectHeight - 0.2;
+                        child.position.y = newWallPosition;
+                    } else if (child.name.includes('placeholder_')) {
+                        configPlaceholders[0].push(child.name);
+                        placeholderHeight = objectHeight;
+    
+                        // Store original placeholder position
+                        if (originalPlaceholderPosition == null) {
+                            originalPlaceholderPosition = child.position.y;
+                        }
                     }
                 }
             }
-        }
-
+    
+        });
+        // Set the camera position
+        camera.position.set(10.51637277396685, 6.694731096055621, -13.827832078903775);
+    
+        // Set the camera rotation
+        camera.rotation.set(-2.5584984615871456, 0.5050634351181527, 2.8326555783283576);
+    }, undefined, function (error) {
+        console.error(error);
     });
+}
 
-
-    // Set the camera position
-    camera.position.set(10.51637277396685, 6.694731096055621, -13.827832078903775);
-
-    // Set the camera rotation
-    camera.rotation.set(-2.5584984615871456, 0.5050634351181527, 2.8326555783283576);
-}, undefined, function (error) {
-    console.error(error);
-});
-
+importCabinModel();
 
 // Function that runs every second to animate
 function animate() {
@@ -380,6 +391,7 @@ function animateElements(arrayOffElementNames, secondsToAnimate, lowerElement, d
         }
     });
     // Store timeline for reversing later
+    console.log("Added main timeline to timelines");
     if (storeTimeline) animationTimelines.push(mainTimeline);
 
     // Play maintimeline
@@ -412,7 +424,6 @@ function animateCameraToPosition(position, meshNameToLookAt, duration) {
         duration: duration,
         onComplete: () => {
             controls.update();
-            console.log('now looking at object.')
         },
         ease: "power1.inOut", 
     })
@@ -440,7 +451,10 @@ function isNamePresentInObject(name) {
     return null;
 }
   
-
+// TODO Create a popup instead of showing the dimensions on the elment.
+    // To get the dynamic dimensions working, it will be too complicated to account for the camera position
+    // and to calculate to find the perfect spot to spawn the text.
+// The popup should spawn in front of the camera (at a decent distance) and despawn once it's clicked. 
 let textIsDisplayed = false;
 let textForElementName;
 function showSizeOnElementHover() {
@@ -508,16 +522,17 @@ function clearSpawnedText() {
     
 $('#Scene1').click(function() {
     console.log('Animating Scene1 ', cabin);
-
-    animateElements(settings.wallElementsNames1, 6, false, 10, false, true);
-    animateCameraToPosition(settings.doubleBedroomPosition, 'G-__560793', 8)
+    animateElements(settings.wallElementsNames1, 5, false, 10, false, true);
+    animateCameraToPosition(settings.doubleBedroomPosition, 'G-__560793', 7)
 });
+
 $('#Scene2').click(function() {
     console.log('Animating Scene2 ', cabin);
-    animateElements(settings.wallElementsNames2, 10, false, 10, false, true);
+    animateElements(settings.wallElementsNames2, 5, false, 10, false, true);
+    animateCameraToPosition(settings.cameraPositionFrontWallTwo, 'G-__559866', 7);
 });
+
 $('#Scene3').click(function() {
-    console.log('Anim length: ', animationTimelines.length)
     console.log('Animating Scene3 ', cabin);
     console.log(settings.roofElementsNames)
     animateElements(settings.roofElementsNames, 5, false, 10, false, true);
@@ -554,6 +569,53 @@ $('#Scene6').click(function() {
     animateCameraToPosition(settings.bedRoomPosition, 'G-__560613', 5);
 });
 
+$('#Scene7').click(function () {
+    console.log('Animating Scene7 ', cabin);
+    // Animate all the camera positions
+    let cameraPositions = [
+        settings.cameraPositionFrontWallOne,
+        settings.cameraPositionFrontWallOneToTwo,
+        settings.cameraPositionFrontWallTwo,
+        settings.cameraPositionFrontWallTwoToThree,
+        settings.cameraPositionFrontWallThree,
+        settings.cameraPositionFrontWallThreeToFour,
+        settings.cameraPositionFrontWallFour,
+        settings.cameraPositionFrontWallFourToFive,
+        settings.cameraPositionFrontWallFive,
+        settings.cameraPositionFrontWallFiveToSix,
+        settings.cameraPositionFrontWallSix,
+        settings.initialCameraPosition
+    ];
+    cameraPositions.forEach((position) => {
+        animateCameraToPosition(position, 'G-__559866', 3);
+    });
+
+    // Animate the cabin walls
+    let wallsObjectArray = [
+        settings.wallElementsNames1,
+        settings.wallElementsNames2,
+        settings.wallElementsNames3,
+        settings.wallElementsNames4,
+        settings.wallElementsNames5,
+        settings.wallElementsNames6
+    ];
+    let wallAnimationTime = 5;
+    let timeout = 0;
+    wallsObjectArray.forEach((wallObjects) => {
+        setTimeout(() => {animateElements(wallObjects, wallAnimationTime, false, 10, false, true);}, timeout * 1000);
+        timeout += wallAnimationTime;
+
+    });
+    
+    // Reverse cabin objects animations
+    setTimeout(() => {
+        console.log('Details loop');
+        console.log(animationTimelines.length - 1);
+        console.log("Reversing the timeline!");
+        reverseTimelineAtIndex(0, 4, true);
+    }, timeout * 1000);
+});
+
 $('#elementsSet').click(function() {
     console.log(uniqueElements);
     uniqueElements = new Set();
@@ -561,23 +623,25 @@ $('#elementsSet').click(function() {
 
 $('#getCamera').click(function() {
     console.log(camera);
-    console.log(camera.getWorldDirection);
-    console.log(camera.getWorldPosition);
+    console.log('"x": ' + camera.position.x + ',' + '\n"y": ' + camera.position.y + ',' + '\n"z": ' + camera.position.z );
 });
 
 /**
  * Reverse all the timelines stored in animationTimelines.
  * @param {int} index Index of the timeline in the array to reverse
  * @param {int} speedMultiplier How much faster should the timeline reverse
+ * @param {boolean} moveForward true to move forward in the timeline array, or false to move backwards
  */
-function reverseTimelineAtIndex(index, speedMultiplier) {
-    if (index >= 0) {
+function reverseTimelineAtIndex(index, speedMultiplier, moveForward) {
+    if (index >= 0 && index < animationTimelines.length) {
         const timeline = animationTimelines[index];
         timeline.eventCallback("onReverseComplete", function() {
-            if (index === 0) {
+            if ((index === 0 && !moveForward) || (index === animationTimelines.length - 1 && moveForward)) {
+                console.log("Cleared timelines!");
                 animationTimelines = [];
             } else {
-                reverseTimelineAtIndex(index - 1, speedMultiplier);
+                let tempIndex = moveForward ? index + 1 : index - 1;
+                reverseTimelineAtIndex(tempIndex, speedMultiplier, moveForward);
             }
         });
         timeline.timeScale(speedMultiplier).reverse();
@@ -585,19 +649,9 @@ function reverseTimelineAtIndex(index, speedMultiplier) {
 }
 
 $('#ResetTimeline').click(function() {
-    for (let index = animationTimelines.length - 1; index >= 0; index--) {
-        reverseTimelineAtIndex(animationTimelines.length - 1, 2);
-    }
+    reverseTimelineAtIndex(animationTimelines.length - 1, 2, false);
     animateCameraToPosition(settings.initialCameraPosition, 'skp2663_2', 5);
     
-});
-
-
-
-$('#resetFurniture').click(function() {
-    for (let index = animationTimelines.length - 1; index >= 0; index--) {
-        reverseTimelineAtIndex(animationTimelines.length - 1, 2);
-    }
 });
 
 $('#configurator').click(function() {
@@ -653,18 +707,12 @@ function initializeConfigurator(showConfigurator) {
     } else {
         animateElements(configPlaceholders, .5, true, 10, false, false);
         animateElements(configWalls, .5, true, 10, false, false);
-
         animateCameraToPosition(settings.topDownSidePosition, 'G-__559866', 7);
         animateCameraToPosition(settings.initialCameraPosition, 'G-__559866', 3);
-        console.log("Anim length: " + animationTimelines.length);
-
-        for (let index = animationTimelines.length - 1; index >= 0; index--) {
-            reverseTimelineAtIndex(animationTimelines.length - 1, 3);
-        }
+        reverseTimelineAtIndex(animationTimelines.length - 1, 3, false);
     }
 }
 
-// TODO Add hover for the wall and store that value, so that I can despawn the wall.
 let originalPlaceholderMaterial;
 let originalWallMaterial;
 let currentHoveredPlaceholder;
@@ -687,7 +735,6 @@ function hoverInConfiguratorMode() {
 
         // Check if it intersects with a placeholder
         if (nameOfIntersectObject.includes('placeholder_')) {
-            console.log("Hovering over placeholder: " + nameOfIntersectObject)
             if (currentHoveredPlaceholder != null && currentHoveredPlaceholder != intersectedObject) {
                 // Restore material to previous item
                 currentHoveredPlaceholder.material = originalPlaceholderMaterial;
@@ -706,10 +753,8 @@ function hoverInConfiguratorMode() {
             // Change color of hovered placeholder
             intersectedObject.material = orangeMaterial;
         } else {
-            console.log("Else placeholder");
             // Restore original material
             if (originalPlaceholderMaterial != null && currentHoveredPlaceholder != null) {
-                console.log("Restored material for " + currentHoveredPlaceholder.name);
                 currentHoveredPlaceholder.material = originalPlaceholderMaterial;
                 currentHoveredPlaceholder.transparent = false;
                 currentHoveredPlaceholder = null;
@@ -780,27 +825,3 @@ function extractIdFromName(name) {
     let extractedId = idMatch ? idMatch[0] : null;
     return extractedId;
 }
-
-
-
-$('#furniture').click(function() {
-    animateElements(settings.roofElementsNames, 0, false, 10, false);
-    animateCameraToPosition(settings.topDownSidePosition, 'G-__559866', 0);
-    // animateElements(settings.interiorWallls, .1, false, 5);
-    console.log("Animating WALLA NOW:")
-    // 5 sec
-    animateElements(settings.interiorWallls, 0, true, 7, false)
-    
-    // 5 sec -- 3000 delay
-    setTimeout(() => {animateElements(settings.furniture, 0, true, 4, false);}, 0);
-
-    
-    console.log('Animating config placeholders.')
-    console.log(configPlaceholders);
-    console.log("type configplaceholders: " + typeof configPlaceholders + " type settings: " + typeof settings.furniture);
-
-    // Get a placeholders position
-    let placeHolderPosition = cabin.getObjectByName(configPlaceholders[0][1]).position.y;
-    let wallPosition = cabin.getObjectByName(configWalls[0][1]).position.y;
-    setTimeout(() => {animateElements(configPlaceholders, 2, true, -placeHolderPosition, true)}, 500);
-});
