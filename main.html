@@ -1,132 +1,208 @@
 <!DOCTYPE html>
-    <head>
-        <meta charset="utf-8">
-        <title>Display prototype</title>
-        <link rel="stylesheet" href="bootstrap/bootstrap.min.css">
-        <link rel="stylesheet" href="main.css">
-        
-    </head>
 
-    <body>
-        
-        <header  style="text-align: center;">
-            <img src="Images/beòhus-logo-reverse-rgb.png" style="height: 50px; width: 275px;">
-        </header>
-        
-        <nav>
-            <a href="Assistant.html"><button><h2>Go to assistant protopype</h2></button></a>
-        </nav>
-        
-        <div class="container">
-            <article class="Dark">
-                <section>
-                    <!-- This section holds all of the button lists-->
-                    <ul>
-                        <!-- The main buttons that will always be visible-->
-                        <li><button id="outside" class="selectedTop" onclick="buttonAction('outside')">Outside</button></li>
-                        <li><button id="configurator" onclick="buttonAction('configurator')">Configurator</button></li>
-                    </ul>
-                </section>
+<head>
+    <meta charset="utf-8">
+    <title>Display prototype</title>
+    <link rel="stylesheet" href="bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="main.css">
 
-                <section>
-                    <!--Second layer of buttons-->
+</head>
 
-                    <ul id="layer2List1">
-                        <!-- The Outside buttons will be visible by default-->
-                        <li><button id="side1" class="selectedMid" onclick="buttonAction('side1')">Reveal side 1</button></li>
-                        <li><button id="side2" onclick="buttonAction('side2')">Reveal side 2</button></li>
-                        <li><button id="side3" onclick="buttonAction('side3')">Reveal side 3</button></li>
-                        <li><button id="side4" onclick="buttonAction('side4')">Reveal side 4</button></li>
-                        <li><button id="side5" onclick="buttonAction('side5')">Reveal side 5</button></li>
-                        <li><button id="side6" onclick="buttonAction('side6')">Reveal side 6</button></li>
-                        <li><button id="inside" onclick="buttonAction('inside')">Inside view</button></li>
-                        <!-- A toggle button-->
-                        <li><button id="show-size1" onclick="buttonAction('show-size1')">Show sizes</button></li>
-                    </ul>
+<body>
 
-                    <ul id="layer2List2" class="smolhidden">
-                        <!-- configurator buttons not visible by default-->
-                        <li><button id="top-down" onclick="buttonAction('top-down')">Top-down view</button></li>
-                        <li><button id="toggle-size" onclick="buttonAction('toggle-size')">Toggle size</button></li>
-                        <li><button id="show-size2" onclick="buttonAction('show-size2')">Show sizes</button></li>
-                        <li><button id="exit" onclick="buttonAction('exit')">Exit configurator</button></li>
-                    </ul>
-                </section>
+    <header style="text-align: center;">
+        <!--Navigation and other tabs Title or logo Which TBD-->
+        <img src="Images/beòhus-logo-reverse-rgb.png" style="height: 50px; width: 275px;">
+    </header>
+    <nav>
+        <a href="Assistant.html"><button>
+                <h2>Go to assistant protopype</h2>
+            </button></a>
+    </nav>
+    <div class="container">
+        <article class="Dark">
+            <section>
+                <!-- This section holds all of the button lists-->
+                <ul>
+                    <!-- The main buttons that will always be visible-->
+                    <li><button id="outside" class="selectedTop" onclick="buttonAction('outside')">Outside</button></li>
+                    <li><button id="configurator" onclick="buttonAction('configurator')">Configurator</button></li>
+                </ul>
+            </section>
 
-                <section id="layer3" class="bighidden">
-                    <ul id="layer3List" class="smolhidden">
-                        <!-- interior room buttons not visible by default-->
-                        <li><button id="living" class="selectedBot" onclick="buttonAction('living')">Living room</button></li>
-                        <li><button id="bath" onclick="buttonAction('bath')">Bathroom</button></li>
-                        <li><button id="single" onclick="buttonAction('single')">Single Bedroom</button></li>
-                        <li><button id="double" onclick="buttonAction('double')">Double Bedroom</button></li>
-                    </ul>
-                </section>
+            <section>
+                <!--Second layer of buttons-->
 
-            
-                <section class="content">
-                    <img src="Images\23.png" class="interior">
-                    <!--Div to hold the interactive software-->
-                </section>
-            </article>
+                <ul id="layer2List1">
+                    <!-- The Outside buttons will be visible by default-->
+                    <li><button id="side1" class="selectedMid" onclick="buttonAction('side1')">Reveal side 1</button>
+                    </li>
+                    <li><button id="side2" onclick="buttonAction('side2')">Reveal side 2</button></li>
+                    <li><button id="side3" onclick="buttonAction('side3')">Reveal side 3</button></li>
+                    <li><button id="side4" onclick="buttonAction('side4')">Reveal side 4</button></li>
+                    <li><button id="side5" onclick="buttonAction('side5')">Reveal side 5</button></li>
+                    <li><button id="side6" onclick="buttonAction('side6')">Reveal side 6</button></li>
+                    <li><button id="inside" onclick="buttonAction('inside')">Inside view</button></li>
+                    <!-- A toggle button-->
+                    <li><button id="show-size1" onclick="buttonAction('show-size1')">Show sizes</button></li>
+                </ul>
 
-            <article>
-                <section>
-                    <br>
-                    <div class="title">More on the cabin</div>
-                    <br>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna
+                <ul id="layer2List2" class="smolhidden">
+                    <!-- configurator buttons not visible by default-->
+                    <li><button id="top-down" onclick="buttonAction('top-down')">Top-down view</button></li>
+                    <li><button id="toggle-size" onclick="buttonAction('toggle-size')">Toggle size</button></li>
+                    <li><button id="show-size2" onclick="buttonAction('show-size2')">Show sizes</button></li>
+                    <li><button id="exit" onclick="buttonAction('exit')">Exit configurator</button></li>
+                </ul>
+            </section>
+
+            <section id="layer3" class="bighidden">
+                <ul id="layer3List" class="smolhidden">
+                    <!-- interior room buttons not visible by default-->
+                    <li><button id="living" class="selectedBot" onclick="buttonAction('living')">Living room</button>
+                    </li>
+                    <li><button id="bath" onclick="buttonAction('bath')">Bathroom</button></li>
+                    <li><button id="single" onclick="buttonAction('single')">Single Bedroom</button></li>
+                    <li><button id="double" onclick="buttonAction('double')">Double Bedroom</button></li>
+                </ul>
+            </section>
+
+
+            <section class="content">
+                <img src="Images\x23.png" class="interior">
+                <!--Div to hold the interactive software-->
+            </section>
+        </article>
+
+        <section>
+            <br>
+            <div class="title">Highland Wood Model</div>
+            <br>
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="carouselExampleIndicators" class="carousel slide">
+                        <div class="carousel-indicators" style="width: fit-content; margin: auto; background: none;">
+                            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0"
+                                class="active" aria-current="true" aria-label="Slide 1"></button>
+                            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1"
+                                aria-label="Slide 2"></button>
+                            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2"
+                                aria-label="Slide 3"></button>
+                            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="3"
+                                aria-label="Slide 4"></button>
+                            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="4"
+                                aria-label="Slide 5"></button>
+                        </div>
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <img src="Images/Bike_path2-1.jpg" class="d-block w-100" alt="...">
+                            </div>
+                            <div class="carousel-item">
+                                <img src="Images/Bike_path2-2.jpg" class="d-block w-100" alt="...">
+                            </div>
+                            <div class="carousel-item">
+                                <img src="Images/Bike_path2-3.jpg" class="d-block w-100" alt="...">
+                            </div>
+                            <div class="carousel-item">
+                                <img src="Images/Bike_path2-4.jpg" class="d-block w-100" alt="...">
+                            </div>
+                            <div class="carousel-item">
+                                <img src="Images/Bike_path2-5.jpg" class="d-block w-100" alt="...">
+                            </div>
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators"
+                            data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators"
+                            data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <article>
+            <section>
+                <br>
+                <div class="title">More on the cabin</div>
+                <br>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                            labore et dolore magna
                             aliqua.
-                            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-                            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna
+                            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+                            commodo consequat.
+                            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                            pariatur.
+                            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit
+                            anim id est laborum.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                            labore et dolore magna
                             aliqua.
-                            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-                            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+                            commodo consequat.
+                            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                            pariatur.
+                            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit
+                            anim id est laborum.
                         </p>
                     </div>
-                        <div class="col-md-6"><img src="Images/Bike_path2-1.jpg" style="width: 100%;"></div>
-                        
+                    <div class="col-md-6"><img src="Images/Bike_path2-1.jpg" style="width: 100%;"></div>
+
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-md-6">
+                        <img src="Images/HighresScreenshot_2022.06.15-00.10.17.png" style="width: 100%;">
                     </div>
-                    <br>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <img src="Images/HighresScreenshot_2022.06.15-00.10.17.png" style="width: 100%;">
-                        </div>
 
-                        <div class="col-md-6">
-                            <p>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-                                dolore magna
-                                aliqua.
-                                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-                                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
-                                laborum.
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-                                dolore magna
-                                aliqua.
-                                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-                                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
-                                laborum.
-                            </p>
-                        </div>
+                    <div class="col-md-6">
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                            labore et
+                            dolore magna
+                            aliqua.
+                            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+                            commodo consequat.
+                            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                            pariatur.
+                            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit
+                            anim id est
+                            laborum.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                            labore et
+                            dolore magna
+                            aliqua.
+                            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+                            commodo consequat.
+                            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                            pariatur.
+                            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit
+                            anim id est
+                            laborum.
+                        </p>
                     </div>
-                </section>
+                </div>
+            </section>
 
-            </article>
-        </div>
+        </article>
+    </div>
 
-        <footer>
-            <!--Place your own footer here-->
-        </footer>
-    </body>
-    <script src="bootstrap/bootstrap.bundle.min.js"></script>
-    <script src="main.js"></script>
+    <footer>
+        <br>
+        <div class="title"><img src="Images/MOTION.png" style="width: 100px;"> <br> All Right Reserves to "Team Motion" </div>
+        <br>
+    </footer>
+</body>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="bootstrap/bootstrap.bundle.min.js"></script>
+<script src="main.js"></script>
+
 </html>

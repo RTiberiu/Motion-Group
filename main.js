@@ -15,69 +15,167 @@ switch(cell){
 
     /*Middle layer first set of buttons */
     case "side1":
+        $('.content').append(`<img src='Images/loader.gif' class='loader'>`);
+        
+        setTimeout(function () {
+            $('.content').html('');
+            $('.content').html(`<img src='Images/x23.png' class='interior'>`);
+        }, 2000);
         switchMid(cell);
         break;
 
     case "side2": 
+        $('.content').append(`<img src='Images/loader.gif' class='loader'>`);
+        
+        setTimeout(function () {
+            $('.content').html('');
+            $('.content').html(`<img src='Images/Bike_path2-1.jpg' class='interior'>`);
+        }, 2000);
         switchMid(cell);
         break;
 
     case "side3": 
+        $('.content').append(`<img src='Images/loader.gif' class='loader'>`);
+        
+        setTimeout(function () {
+            $('.content').html('');
+            $('.content').html(`<img src='Images/HighresScreenshot_2022.07.01-02.00.03.png' class='interior'>`);
+        }, 2000);
         switchMid(cell);
         break;
     case "side4": 
+        $('.content').append(`<img src='Images/loader.gif' class='loader'>`);
+        
+        setTimeout(function () {
+            $('.content').html('');
+            $('.content').html(`<img src='Images/x23.png' class='interior'>`);
+        }, 2000);
         switchMid(cell);
         break;
 
     case "side5": 
+        $('.content').append(`<img src='Images/loader.gif' class='loader'>`);
+        
+        setTimeout(function () {
+            $('.content').html('');
+            $('.content').html(`<img src='Images/x23.png' class='interior'>`);
+        }, 2000);
         switchMid(cell);
         break;
 
     case "side6": 
+        $('.content').append(`<img src='Images/loader.gif' class='loader'>`);
+        
+        setTimeout(function () {
+            $('.content').html('');
+            $('.content').html(`<img src='Images/x23.png' class='interior'>`);
+        }, 2000);
         switchMid(cell);
         break;
     
     case "inside": 
+        $('.content').append(`<img src='Images/loader.gif' class='loader'>`);
+        
+        setTimeout(function () {
+            $('.content').html('');
+            $('.content').html(`<img src='Images/x23.png' class='interior'>`);
+        }, 2000);
         switchMid(cell);
         break;
 
     case "show-size1": 
+
+        $('.content').append(`<img src='Images/loader.gif' class='loader'>`);
+
+        setTimeout(function () {
+            $('.content').html('');
+            $('.content').html(`<img src='Images/x23.png' class='interior'>`);
+        }, 2000);
         toggleSize(cell);
         break;
 
 
     /*Middle layer second set of buttons */
     case "top-down":
+
+        $('.content').append(`<img src='Images/loader.gif' class='loader'>`);
+
+        setTimeout(function () {
+            $('.content').html('');
+            $('.content').html(`<img src='Images/x23.png' class='interior'>`);
+        }, 2000);
         switchMid(cell);
         break;
     
     case "toggle-size":
+        $('.content').append(`<img src='Images/loader.gif' class='loader'>`);
+
+        setTimeout(function () {
+            $('.content').html('');
+            $('.content').html(`<img src='Images/x23.png' class='interior'>`);
+        }, 2000);
         switchMid(cell);
         break;
 
-    case "show-size2": 
+    case "show-size2":
+        $('.content').append(`<img src='Images/loader.gif' class='loader'>`);
+
+        setTimeout(function () {
+            $('.content').html('');
+            $('.content').html(`<img src='Images/x23.png' class='interior'>`);
+        }, 2000);
         toggleSize(cell);
         break;
 
     case "exit":
+        $('.content').append(`<img src='Images/loader.gif' class='loader'>`);
+
+        setTimeout(function () {
+            $('.content').html('');
+            $('.content').html(`<img src='Images/x23.png' class='interior'>`);
+        }, 2000);
         switchMid(cell);
         break;
 
     
     /*Lower layer of buttons*/
     case "living":
+        $('.content').append(`<img src='Images/loader.gif' class='loader'>`);
+
+        setTimeout(function () {
+            $('.content').html('');
+            $('.content').html(`<img src='Images/x23.png' class='interior'>`);
+        }, 2000);
        switchLow(cell);
         break;
 
     case "bath":
+        $('.content').append(`<img src='Images/loader.gif' class='loader'>`);
+
+        setTimeout(function () {
+            $('.content').html('');
+            $('.content').html(`<img src='Images/x23.png' class='interior'>`);
+        }, 2000);
         switchLow(cell);
         break;
 
     case "single":
+        $('.content').append(`<img src='Images/loader.gif' class='loader'>`);
+
+        setTimeout(function () {
+            $('.content').html('');
+            $('.content').html(`<img src='Images/x23.png' class='interior'>`);
+        }, 2000);
         switchLow(cell);
         break;
 
     case "double":
+        $('.content').append(`<img src='Images/loader.gif' class='loader'>`);
+
+        setTimeout(function () {
+            $('.content').html('');
+            $('.content').html(`<img src='Images/x23.png' class='interior'>`);
+        }, 2000);
         switchLow(cell);
         break;
     };
