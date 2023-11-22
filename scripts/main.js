@@ -197,6 +197,72 @@ function showDimensionsAtPosition(height, width, mainObject) {
     
 }
 
+// Create and store the popup element
+scene.add(camera);
+function loadPopupElement() {
+    const geometry = new THREE.BoxGeometry(3, 2, .1);
+    const material = createBasicMaterialWithColor('fffff2');
+    material.transparent = true;
+    material.opacity = 0;
+    const popup = new THREE.Mesh(geometry, material);
+    popup.userData.id = 'popup';
+    popup.scale.x = 0.5;
+    popup.scale.y = 0.5;
+    camera.add(popup);
+    return popup;
+}
+const popup = loadPopupElement();
+
+function spawnPopupAtLocation(height, width) {
+    let popupTimeline = gsap.timeline({paused: true});
+    let animDuration = 0.5;
+    console.log(camera)
+    popupTimeline.to(popup.position, {
+        x: 0,
+        y: 0,
+        z: -5,
+        duration: 0,
+        ease: 'power1.inOut'
+    })
+    .to(popup.material, {
+        opacity: 1,
+        duration: animDuration,
+        ease: 'power1.inOut'
+    })
+    .to(popup.scale, {
+        x: 1,
+        y: 1,
+        duration: animDuration,
+        ease: 'power1.inOut'
+    }, '-=' + animDuration)
+    popupTimeline.play();
+}
+
+function removePopup() {
+    let popupTimeline = gsap.timeline({paused: true});
+    let animDuration = 0.5;
+    popupTimeline.to(popup.material, {
+        opacity: 0,
+        duration: animDuration,
+        ease: 'power1.inOut'
+    })
+    .to(popup.scale, {
+        x: 0.5,
+        y: 0.5,
+        duration: animDuration,
+        ease: 'power1.inOut'
+    }, '-=' + animDuration)
+    popupTimeline.to(popup.position, {
+        x: 0,
+        y: 0,
+        z: +5,
+        duration: 0,
+        ease: 'power1.inOut'
+    });
+
+    popupTimeline.play();
+}
+
 // Configurator mode
 let isConfiguratorMode = false;
 
@@ -285,6 +351,10 @@ function animate() {
     if (heightTextMesh != null && widthTextMesh != null) {
         heightTextMesh.lookAt(camera.position);
         widthTextMesh.lookAt(camera.position);
+    }
+
+    if (popup != null) {
+        popup.lookAt(camera.position);
     }
     
     // console.log(camera);
@@ -412,7 +482,7 @@ function countTotalElementsOfArray(array) {
         }
     });
     return count;
-}
+}   
 
 function animateCameraToPosition(position, meshNameToLookAt, duration) {
     let objectToLookAt = cabin.getObjectByName(meshNameToLookAt);
@@ -455,9 +525,9 @@ function isNamePresentInObject(name) {
     // To get the dynamic dimensions working, it will be too complicated to account for the camera position
     // and to calculate to find the perfect spot to spawn the text.
 // The popup should spawn in front of the camera (at a decent distance) and despawn once it's clicked. 
-let textIsDisplayed = false;
+let popupIsDisplayed = false;
 let textForElementName;
-function showSizeOnElementHover() {
+function showSizeOnElementClick() {
     const mouse = new THREE.Vector2();
     mouse.x = mouseX;
     mouse.y = mouseY;
@@ -467,9 +537,16 @@ function showSizeOnElementHover() {
 
     intersects.length = 0;
     raycaster.intersectObjects(scene.children, true, intersects);
+    console.log(raycaster.intersectObject(popup));
+    console.log(raycaster.intersectObject(popup).length > 0);
 
-    if (intersects.length > 0) {
+    if (raycaster.intersectObject(popup).length > 0) {
+        console.log("Remove popup");
+        removePopup();
+        popupIsDisplayed = false;
+    } else if (intersects.length > 0) {
         let nameOfObject = intersects[0].object.name;
+        console.log("Clicked " + nameOfObject)
         let namePresentObject = isNamePresentInObject(nameOfObject);
         
         if (namePresentObject != null) {
@@ -482,25 +559,16 @@ function showSizeOnElementHover() {
             let width = '1.2 m'; // Pull this info from a JSON database
             
             // Show dimensions over the element 
-            if (!textIsDisplayed) { 
+            if (!popupIsDisplayed) { 
                 textForElementName = hoveringOver;
-                textIsDisplayed = true;
+                popupIsDisplayed = true;
                 let mainObject = cabin.getObjectByName(mainObjectName);
                 
-                // Pass the main object and its dimensions
-                showDimensionsAtPosition(height, width, mainObject);
+                console.log("Spawning popup");
+                spawnPopupAtLocation('asd', 'asd');
             }
-
-            // Reset text if hovering over another element
-            // console.log("hoveringOver: " + hoveringOver + " textForElementName: " + textForElementName);
-            if (hoveringOver != textForElementName) {
-                console.log("Changed hovered element. Resetting text.")
-                textIsDisplayed = false;
-                clearSpawnedText();
-            } 
-        }
-        
-    }
+        }  
+    } 
 }
 
 function clearSpawnedText() {
@@ -546,10 +614,10 @@ $('#sizeMode').click(function() {
     console.log('Size mode! ', sizeMode);
 
     if (sizeMode) {
-        window.addEventListener('mousemove', showSizeOnElementHover);
+        window.addEventListener('click', showSizeOnElementClick);
     } else {
         clearSpawnedText();
-        window.removeEventListener('mousemove', showSizeOnElementHover);
+        window.removeEventListener('click', showSizeOnElementClick);
     }  
 });
 
