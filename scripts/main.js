@@ -197,6 +197,25 @@ function showDimensionsAtPosition(height, width, mainObject) {
     
 }
 
+// Function to load text geometry
+function createTextGeometry(text, height, width) {
+    // Load your desired font, or use a default one
+    fontLoader.load('../fonts/Montserrat Thin_Regular.json', function (font) {
+        const textGeometry = new TextGeometry(text, {
+            font: font,
+            size: height,  // Set the height of the text
+            height: 0.1,   // Extrusion thickness
+            curveSegments: 12,
+            bevelEnabled: false
+        });
+
+        const material = createBasicMaterialWithColor('3a3b3c');
+        const textMesh = new THREE.Mesh(textGeometry, material);
+        textMesh.scale.set(width, width, 1); // Set the width of the text
+        camera.add(textMesh);
+    });
+}
+
 // Create and store the popup element
 scene.add(camera);
 function loadPopupElement() {
@@ -205,6 +224,12 @@ function loadPopupElement() {
     material.transparent = true;
     material.opacity = 0;
     const popup = new THREE.Mesh(geometry, material);
+
+    // Adding the text to the popup
+    const textHeight = 1; // Set the desired text height
+    const textWidth = 2;  // Set the desired text width
+    createTextGeometry('Your Text Here', textHeight, textWidth);
+
     popup.userData.id = 'popup';
     popup.scale.x = 0.5;
     popup.scale.y = 0.5;
@@ -279,7 +304,7 @@ const loader = new GLTFLoader();
 let cabin;
 
 function importCabinModel() {
-    loader.load('../3d_models/beohusconfig_04.gltf', function(gltf) {
+    loader.load('../3d_models/beohus_with_coffee_shop_final.gltf', function(gltf) {
         console.log(gltf);
         cabin = gltf.scene;
         console.log(cabin);
@@ -294,7 +319,10 @@ function importCabinModel() {
                 child.receiveShadow = true;
     
                 // Hide configurator walls and placeholders
-                if (child.name.includes('wall_') || child.name.includes('placeholder_')) {
+                let isWall = child.name.includes('wall_');
+                let isPlaceholder = child.name.includes('placeholder_');
+                let isCoffeeShop = child.name.includes('coffeeshop_')
+                if (isWall || isPlaceholder || isCoffeeShop) {
                     console.log("Hiding configuration walls!");
                     // Clone the material and apply it to mesh to avoid animating on shared material
                     let clonedMaterial = child.material.clone()
@@ -306,7 +334,7 @@ function importCabinModel() {
                     // Store mesh names into arrays
                     let boundingBox = new THREE.Box3().setFromObject(child);
                     let objectHeight = boundingBox.max.y - boundingBox.min.y;
-                    if (child.name.includes('wall_')) {
+                    if (isWall) {
                         configWalls[0].push(child.name);
                         // Store original wall position
                         if (originalWallPosition == null) {
@@ -315,7 +343,7 @@ function importCabinModel() {
                         // Move walls underneath the cabin
                         newWallPosition = child.position.y - objectHeight - 0.2;
                         child.position.y = newWallPosition;
-                    } else if (child.name.includes('placeholder_')) {
+                    } else if (isPlaceholder) {
                         configPlaceholders[0].push(child.name);
                         placeholderHeight = objectHeight;
     
@@ -323,6 +351,8 @@ function importCabinModel() {
                         if (originalPlaceholderPosition == null) {
                             originalPlaceholderPosition = child.position.y;
                         }
+                    } else if (isCoffeeShop) {
+                        child.position.y = child.position.y - 10;
                     }
                 }
             }
