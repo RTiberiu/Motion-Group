@@ -288,8 +288,9 @@ function removePopup() {
     popupTimeline.play();
 }
 
-// Configurator mode
+// Configurator mode or coffeShop mode
 let isConfiguratorMode = false;
+let isCoffeeShopMode = false;
 
 // Storing configurator components
 let configPlaceholders = [["together"]];
@@ -302,9 +303,10 @@ let originalPlaceholderPosition;
 // Importing the 3D model for the cabin
 const loader = new GLTFLoader();
 let cabin;
-
+let coffeeHeight;
+let coffeeShopIds = new Set();
 function importCabinModel() {
-    loader.load('../3d_models/beohus_with_coffee_shop_final.gltf', function(gltf) {
+    loader.load('../3d_models/beohus_with_coffee_shop_finale1.gltf', function(gltf) {
         console.log(gltf);
         cabin = gltf.scene;
         console.log(cabin);
@@ -325,7 +327,7 @@ function importCabinModel() {
                 if (isWall || isPlaceholder || isCoffeeShop) {
                     console.log("Hiding configuration walls!");
                     // Clone the material and apply it to mesh to avoid animating on shared material
-                    let clonedMaterial = child.material.clone()
+                    let clonedMaterial = child.material.clone();
                     clonedMaterial.transparent = true;
                     child.material = clonedMaterial;
                     // Make the mesh transparent
@@ -341,18 +343,20 @@ function importCabinModel() {
                             originalWallPosition = child.position.y;
                         }
                         // Move walls underneath the cabin
-                        newWallPosition = child.position.y - objectHeight - 0.2;
+                        newWallPosition = child.position.y - objectHeight - .4;
                         child.position.y = newWallPosition;
                     } else if (isPlaceholder) {
                         configPlaceholders[0].push(child.name);
                         placeholderHeight = objectHeight;
-    
+
                         // Store original placeholder position
                         if (originalPlaceholderPosition == null) {
                             originalPlaceholderPosition = child.position.y;
                         }
+                        child.position.y = child.position.y - objectHeight - .4;
                     } else if (isCoffeeShop) {
-                        child.position.y = child.position.y - 10;
+                        coffeeHeight = child.position.y;
+                        child.position.y = child.position.y - objectHeight - 5;
                     }
                 }
             }
@@ -363,12 +367,33 @@ function importCabinModel() {
     
         // Set the camera rotation
         camera.rotation.set(-2.5584984615871456, 0.5050634351181527, 2.8326555783283576);
+
+        getIds();
+
     }, undefined, function (error) {
         console.error(error);
     });
 }
 
 importCabinModel();
+
+
+function getIds() {
+    cabin.traverse((child) => {
+
+        if (child.name.includes('coffeeshop_')) {
+            if (child.isMesh) {
+                coffeeShopIds.add(child.name);
+            } else {
+                child.children.forEach((childMesh) => {
+                    coffeeShopIds.add(childMesh.name);
+                });
+            }
+        }
+    });
+
+    console.log(coffeeShopIds);
+}
 
 // Function that runs every second to animate
 function animate() {
@@ -438,9 +463,9 @@ function animateElements(arrayOffElementNames, secondsToAnimate, lowerElement, d
                 ease: "power3.in"
             }, '');
         }
-        
+
         // Clone the material and apply it to mesh to avoid animating on shared material
-        let clonedMaterial = object.material.clone()
+        let clonedMaterial = object.material.clone();
         clonedMaterial.transparent = true;
         object.material = clonedMaterial;
         
@@ -462,15 +487,13 @@ function animateElements(arrayOffElementNames, secondsToAnimate, lowerElement, d
     let totalItemsToAnimate = countTotalElementsOfArray(localArrayOfElementNames);
     // let animStagger = secondsToAnimate / totalItemsToAnimate;
     let itemAnimationTime = secondsToAnimate / totalItemsToAnimate;
-    let animStagger = 1;
-    
+    let animStagger = itemAnimationTime / 2;
+    console.log("Animating item for: " + itemAnimationTime);
     let mainTimeline = gsap.timeline({paused: true, stagger: animStagger});
     // Loop though the array of arrays and create a timeline for each
     localArrayOfElementNames.forEach((elementArray, indexSet) => {
         if (Array.isArray(elementArray)) {
-            
             animationStyle = elementArray.shift();
-            // let itemAnimationTime = secondsToAnimate - (animStagger * indexSet + 1);
             if (animationStyle == 'together') {
                 currentTimeline = gsap.timeline({paused: false, stagger: 0});
                 animationDelay = false;
@@ -714,6 +737,68 @@ $('#Scene7').click(function () {
     }, timeout * 1000);
 });
 
+$('#coffeeShop').click(function() {
+    // Toggle configurator mode
+    if (!isCoffeeShopMode) isCoffeeShopMode = true;
+    else isCoffeeShopMode = false;
+
+    if (isCoffeeShopMode) {
+        console.log('Animating coffee shop ', cabin);
+        // Animate camera
+        let cameraDelay = 3000;
+        animateCameraToPosition(settings.topDownSidePosition, 'G-__559866', 3);
+        setTimeout(() => {animateCameraToPosition(settings.topDownCoffeePosition, 'G-__559866', 4)}, cameraDelay);
+        cameraDelay += 4000;
+        setTimeout(() => {animateCameraToPosition(settings.topDownCoffeeTwoPosition, 'G-__559866', 4)}, cameraDelay);
+        cameraDelay += 4000;
+        setTimeout(() => {animateCameraToPosition(settings.topDownCoffeeThreePosition, 'G-__559866', 4)}, cameraDelay);
+        cameraDelay += 4000;
+        setTimeout(() => {animateCameraToPosition(settings.topDownCoffeeFourPosition, 'G-__559866', 6)}, cameraDelay);
+        cameraDelay += 6500;
+        setTimeout(() => {animateCameraToPosition(settings.topDownSidePosition, 'G-__559866', 4)}, cameraDelay);
+        
+        // Animate roof
+        animateElements(settings.roofElementsNames, 2, false, 8, false, true);
+        
+        // Animate interior walls
+        let setAnimationDelay = 0;
+        setAnimationDelay += 2000;
+        setTimeout(() => {animateElements(settings.interiorWallls, 4, true, 7, false, true);}, setAnimationDelay);
+
+        // Animate furniture 
+        setAnimationDelay += 1500;
+        setTimeout(() => {animateElements(settings.furniture, 2, true, 2, false, true);}, setAnimationDelay);
+        setTimeout(() => {animateElements(settings.furnitureTwo, 2, true, 2, false, true);}, setAnimationDelay);
+        setTimeout(() => {animateElements(settings.furnitureThree, 2, true, 2, false, true);}, setAnimationDelay);
+        setTimeout(() => {animateElements(settings.outsideFurniture, 2, true, 6, false, true);}, setAnimationDelay);
+        
+        // Animate the coffee shop items
+        setAnimationDelay += 2000;
+        let coffeeShopObjectsArray = [
+            settings.coffeeShop,
+            settings.coffeeShopTwo,
+            settings.coffeeShopThree,
+            settings.coffeeShopFour,
+            settings.coffeeShopFive,
+            settings.coffeeShopSix,
+            settings.coffeeShopSeven
+        ];
+        
+        setTimeout(() => {animateElements(coffeeShopObjectsArray[0], 10, false, 0, true, true);}, setAnimationDelay);
+        setTimeout(() => {animateElements(coffeeShopObjectsArray[1], 10, false, 0, true, true);}, setAnimationDelay);
+        setTimeout(() => {animateElements(coffeeShopObjectsArray[2], 10, false, 0, true, true);}, setAnimationDelay);
+        setTimeout(() => {animateElements(coffeeShopObjectsArray[3], 10, false, 0, true, true);}, setAnimationDelay);
+        setTimeout(() => {animateElements(coffeeShopObjectsArray[4], 10, false, 0, true, true);}, setAnimationDelay);
+        setTimeout(() => {animateElements(coffeeShopObjectsArray[5], 10, false, 0, true, true);}, setAnimationDelay);
+        setTimeout(() => {animateElements(coffeeShopObjectsArray[6], 10, false, 0, true, true);}, setAnimationDelay);
+
+    } else {
+        reverseTimelineAtIndex(animationTimelines.length - 1, 4, false);
+        animateCameraToPosition(settings.topDownCoffeePosition, 'G-__559866', 16);
+        setTimeout(() => {animateCameraToPosition(settings.initialCameraPosition, 'G-__559866', 4)}, 16000);
+    }
+});
+
 $('#elementsSet').click(function() {
     console.log(uniqueElements);
     uniqueElements = new Set();
@@ -797,7 +882,7 @@ function initializeConfigurator(showConfigurator) {
         setTimeout(() => {animateElements(settings.furniture, 5, true, 2, false, true);}, setAnimationDelay);
         setTimeout(() => {animateElements(settings.furnitureTwo, 5, true, 2, false, true);}, setAnimationDelay);
         setTimeout(() => {animateElements(settings.furnitureThree, 5, true, 2, false, true);}, setAnimationDelay);
-    
+        
         // Show placeholders
         setAnimationDelay += 5000;
         let placeHolderPosition = originalPlaceholderPosition + placeholderHeight;
@@ -861,7 +946,6 @@ function hoverInConfiguratorMode() {
 
         // Check if it intersects with a wall
         if (nameOfIntersectObject.includes('wall_')) {
-            console.log("Hovering over wall: " + nameOfIntersectObject)
             if (currentHoveredWall != null && currentHoveredWall != intersectedObject) {
                 // Restore material to previous item
                 currentHoveredWall.material = originalWallMaterial;
@@ -880,10 +964,8 @@ function hoverInConfiguratorMode() {
             // Change color of hovered placeholder
             intersectedObject.material = orangeMaterial;
         } else {
-            console.log("Else wall");
             // Restore original material
             if (originalWallMaterial != null && currentHoveredWall != null) {
-                console.log("Restored material for " + currentHoveredWall.name);
                 currentHoveredWall.material = originalWallMaterial;
                 currentHoveredWall.transparent = false;
                 currentHoveredWall = null;
