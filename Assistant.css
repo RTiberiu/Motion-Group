@@ -1,0 +1,22 @@
+#messages{
+    display:block;
+    background-color: #F5F1CF;
+}
+.bot{
+    float:right;
+    clear:both;
+    background-color: #233D1F;
+    padding: 3px;
+    border-radius: 5px;
+}
+.usr{
+    float:left;
+    clear:both;
+    background-color: #879275;
+    padding: 3px;
+    border-radius: 5px;
+}
+
+section{
+    clear:both
+}

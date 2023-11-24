@@ -6,11 +6,24 @@ Quick rules:
 */
 
 /*Text*/
-h1{font-family: Arial, Helvetica, sans-serif;}
-h2{font-size: Arial, 'Monument Extended', sans-serif;}
-p{
+h1{
     font-family: Arial, Helvetica, sans-serif;
+    color:#FFFFFF;
+}
+h2{
+    font-family: Arial, 'Monument Extended', sans-serif;
+    color: #FFFFFF;
+}
+article p{
+    font-family: Helvetica, sans-serif;
     font-weight: lighter;
+    color:#FFFFFF;
+}
+footer p{
+    color:#233D1F ;
+}
+footer a{
+    color: #233D1F;
 }
 
 /*
@@ -19,10 +32,91 @@ Must use Helvetica for Document headings, body copy and annotations
 Ecomms and colab must be Arial
 */
 
+/* button bar styling*/
+button{
+    background-color: #879275;;
+    color: #FFFFFF;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: lighter;
+    border-radius: 5%;
+    border:none;
+}
+button:hover{
+    background-color: #233D1F;
+    box-shadow: #F5F1CF;
+}
+ul{
+    display: inline-flex;
+    list-style:none;
+    margin: 0%;
+}
+li{
+    display: inline-flex;
+    margin:0%;
+}
+
+/*Img/place holder*/
+.interior{
+    width:100%;
+}
+.container{
+    width:100%;
+}
+.info{
+    width:20%;
+}
+
+/*display options*/
+.bighidden{
+    visibility: hidden;
+    height:0;
+}
+.smolhidden{
+    visibility: hidden;
+    height:0;
+    display:flex;
+}
+
+.left{float: left;}
+
+.right{float:right}
+
+.selectedTop{background-color: #233D1F;}
+.selectedMid{background-color: #233D1F;}
+.selectedBot{background-color: #233D1F;}
+.selected{background-color: #233D1F;}
+
 
 /*Colour scheme*/
-body{background-color: #F5F1CF;}
-header{background-color: #8D9B90;}
+body{
+    background-color: #F5F1CF;
+    margin:0;
+}
+nav{
+    background-color: #8D9B90;
+    padding:5px;
+}
+body div{
+    background-color: #8D9B90;
+    width: 100%;
+    margin-top: 0;
+}
+header{
+    background-color: #8D9B90;
+    padding-top: 1%;
+    padding-bottom: 1%;
+    margin-bottom: 0;
+}
+article{
+    margin:auto;
+}
+.Dark{
+    background-color:#879275;
+}
+section{
+    width: 75%;
+    margin: auto;
+}
 /*
 Dark green/Moorland:
     R:35 G:61 B:31

@@ -1,30 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>Three.js test app</title>
-		<style>
-			body { margin: 0; }
-		</style>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-		<script type="module" src="./scripts/main.js"></script>
-	</head>
-	<body>
+    <head>
+        <meta charset="utf-8">
+        <title>Display prototype</title>
+        <link rel="stylesheet" href="main.css">
+        <script src="main.js"></script>
+    </head>
 
-		<button id="Scene1">Side 1</button>
-		<button id="Scene2">Side 2</button>
-		<button id="Scene3">Top down</button>
-		<button id="Scene4">Living Room</button>
-		<button id="Scene5">Bathroom</button>
-		<button id="Scene6">Bedroom</button>
-		<button id="Scene7">360 tour</button>
-		<button id="configurator">Configurator</button>
-		<button id="coffeeShop">Show coffee shop</button>
+    <body>
+        
+        <header>
+            <img src="Images/beòhus-logo-reverse-rgb.png">
+        </header>
+        <nav>
+            <a href="Assistant.html"><button><h2>Go to assistant protopype</h2></button></a>
+        </nav>
+        
+        <div>
+            <article class="Dark">
+                <section>
+                    <!-- This section holds all of the button lists-->
+                    <ul>
+                        <!-- The main buttons that will always be visible-->
+                        <li><button id="outside" class="selectedTop" onclick="buttonAction('outside')"><h2>Outside</h2></button></li>
+                        <li><button id="configurator" onclick="buttonAction('configurator')"><h2>Configurator</h2></button></li>
+                    </ul>
+                </section>
 
-		<!-- Button below are used for testing -->
-		<button id="sizeMode">Size Mode!</button>
-		<button id="ResetTimeline">Reset timeline</button>
-		<button id="elementsSet">Give Elements Set</button>
-		<button id="getCamera">Get Camera</button>
-	</body>
+                <section>
+                    <!--Second layer of buttons-->
+
+                    <ul id="layer2List1">
+                        <!-- The Outside buttons will be visible by default-->
+                        <li><button id="side1" class="selectedMid" onclick="buttonAction('side1')"><h2>Reveal side 1</h2></button></li>
+                        <li><button id="side2" onclick="buttonAction('side2')"><h2>Reveal side 2</h2></button></li>
+                        <li><button id="side3" onclick="buttonAction('side3')"><h2>Top down</h2></button></li>
+                        <li><button id="side4" onclick="buttonAction('side4')"><h2>360 tour</h2></button></li>
+                        <li><button id="side5" onclick="buttonAction('side5')"><h2>Reveal side 5</h2></button></li>
+                        <li><button id="side6" onclick="buttonAction('side6')"><h2>Reveal side 6</h2></button></li>
+                        <li><button id="inside" onclick="buttonAction('inside')"><h2>Inside view</h2></button></li>
+                        <!-- A toggle button-->
+                        <li><button id="show-size1" onclick="buttonAction('show-size1')"><h2>Show sizes</h2></button></li>
+                    </ul>
+
+                    <ul id="layer2List2" class="smolhidden">
+                        <!-- configurator buttons not visible by default-->
+                        <li><button id="top-down" onclick="buttonAction('top-down')"><h2>Top-down view</h2></button></li>
+                        <li><button id="toggle-size" onclick="buttonAction('toggle-size')"><h2>Toggle size</h2></button></li>
+                        <li><button id="show-size2" onclick="buttonAction('show-size2')"><h2>Show sizes</h2></button></li>
+                        <li><button id="exit" onclick="buttonAction('exit')"><h2>Exit configurator</h2></button></li>
+                    </ul>
+                </section>
+
+                <section id="layer3" class="bighidden">
+                    <ul id="layer3List" class="smolhidden">
+                        <!-- interior room buttons not visible by default-->
+                        <li><button id="living" class="selectedBot" onclick="buttonAction('living')"><h2>Living room</h2></button></li>
+                        <li><button id="bath" onclick="buttonAction('bath')"><h2>Bathroom</h2></button></li>
+                        <li><button id="single" onclick="buttonAction('single')"><h2>Single Bedroom</h2></button></li>
+                        <li><button id="double" onclick="buttonAction('double')"><h2>Double Bedroom</h2></button></li>
+                    </ul>
+                </section>
+
+            
+                <section class="container">
+                    <img src="Images\22.jpg" class="interior">
+                    <!--Div to hold the interactive software-->
+                </section>
+            </article>
+
+            <article>
+                <section>
+                    <h2>More on the cabin</h1>
+                        <img src="Images/Bike_path2-1.jpg" class="right info">
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+                            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+                            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                        </p>
+                </section>
+
+                <section>
+                    <img src="Images/HighresScreenshot_2022.06.15-00.10.17.png" class="left info">
+                    <p>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+                        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+                        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                    </p>
+                </section>
+            </article>
+        </div>
+
+        <footer>
+            <!--Place your own footer here-->
+        </footer>
+    </body>
 </html>
