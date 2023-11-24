@@ -46,9 +46,6 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.05; 
 controls.rotateSpeed = 0.5;
 
-// Set the camera position
-camera.position.z = 5;
-
 // Toggle for displaying the size or not on click
 let sizeMode = false;
 
@@ -122,7 +119,6 @@ function onMouseClick(event) {
 
             uniqueElements.add(intersects[0].object.name);
             console.log("Clicked Object name: " + intersects[0].object.name);
-            console.log(intersects[0].object);
             console.log(intersects[0].object);
         }
     }
@@ -323,7 +319,6 @@ function importCabinModel() {
                 let isPlaceholder = child.name.includes('placeholder_');
                 let isCoffeeShop = child.name.includes('coffeeshop_')
                 if (isWall || isPlaceholder || isCoffeeShop) {
-                    console.log("Hiding configuration walls!");
                     // Clone the material and apply it to mesh to avoid animating on shared material
                     let clonedMaterial = child.material.clone();
                     clonedMaterial.transparent = true;
@@ -353,7 +348,6 @@ function importCabinModel() {
                         }
                         child.position.y = child.position.y - objectHeight - .4;
                     } else if (isCoffeeShop) {
-                        coffeeHeight = child.position.y;
                         child.position.y = child.position.y - objectHeight - 5;
                     }
                 }
@@ -478,7 +472,6 @@ function animateElements(arrayOffElementNames, secondsToAnimate, lowerElement, d
     // let animStagger = secondsToAnimate / totalItemsToAnimate;
     let itemAnimationTime = secondsToAnimate / totalItemsToAnimate;
     let animStagger = itemAnimationTime / 2;
-    console.log("Animating item for: " + itemAnimationTime);
     let mainTimeline = gsap.timeline({paused: true, stagger: animStagger});
     // Loop though the array of arrays and create a timeline for each
     localArrayOfElementNames.forEach((elementArray, indexSet) => {
@@ -703,9 +696,6 @@ $('#Scene7').click(function () {
     
     // Reverse cabin objects animations
     setTimeout(() => {
-        console.log('Details loop');
-        console.log(animationTimelines.length - 1);
-        console.log("Reversing the timeline!");
         reverseTimelineAtIndex(0, 4, true);
     }, timeout * 1000);
 });
