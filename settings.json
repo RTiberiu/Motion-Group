@@ -1639,7 +1639,13 @@
         "windowWall2Right": [
             "G-__556905_3"
         ]
-
+    },
+    "hoverElementsSizes": {
+        "wall1Hover": ["Wall I", "2m", "5m"],
+        "wall2Hover": ["Wall II", "2m", "5m"],
+        "windowWall1": ["Window wall I", "80cm", "50cm"],
+        "windowWall2Left": ["Window wall II", "80cm", "50cm"],
+        "windowWall2Right": ["Window wall II", "80cm", "50cm"]
     }
     
 

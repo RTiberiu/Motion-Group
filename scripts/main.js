@@ -197,25 +197,6 @@ function showDimensionsAtPosition(height, width, mainObject) {
     
 }
 
-// Function to load text geometry
-function createTextGeometry(text, height, width) {
-    // Load your desired font, or use a default one
-    fontLoader.load('../fonts/Montserrat Thin_Regular.json', function (font) {
-        const textGeometry = new TextGeometry(text, {
-            font: font,
-            size: height,  // Set the height of the text
-            height: 0.1,   // Extrusion thickness
-            curveSegments: 12,
-            bevelEnabled: false
-        });
-
-        const material = createBasicMaterialWithColor('3a3b3c');
-        const textMesh = new THREE.Mesh(textGeometry, material);
-        textMesh.scale.set(width, width, 1); // Set the width of the text
-        camera.add(textMesh);
-    });
-}
-
 // Create and store the popup element
 scene.add(camera);
 function loadPopupElement() {
@@ -224,12 +205,6 @@ function loadPopupElement() {
     material.transparent = true;
     material.opacity = 0;
     const popup = new THREE.Mesh(geometry, material);
-
-    // Adding the text to the popup
-    const textHeight = 1; // Set the desired text height
-    const textWidth = 2;  // Set the desired text width
-    createTextGeometry('Your Text Here', textHeight, textWidth);
-
     popup.userData.id = 'popup';
     popup.scale.x = 0.5;
     popup.scale.y = 0.5;
@@ -238,29 +213,49 @@ function loadPopupElement() {
 }
 const popup = loadPopupElement();
 
-function spawnPopupAtLocation(height, width) {
-    let popupTimeline = gsap.timeline({paused: true});
-    let animDuration = 0.5;
-    console.log(camera)
-    popupTimeline.to(popup.position, {
-        x: 0,
-        y: 0,
-        z: -5,
-        duration: 0,
-        ease: 'power1.inOut'
-    })
-    .to(popup.material, {
-        opacity: 1,
-        duration: animDuration,
-        ease: 'power1.inOut'
-    })
-    .to(popup.scale, {
-        x: 1,
-        y: 1,
-        duration: animDuration,
-        ease: 'power1.inOut'
-    }, '-=' + animDuration)
-    popupTimeline.play();
+function spawnPopupAtLocation(name, height, width) {
+    let text = `Wall: ${name}\nHeight: ${height}\nWidth: ${width}`
+    fontLoader.load('../fonts/Montserrat Thin_Regular.json', function (font) {
+        const textGeometry = new TextGeometry(text, {
+            font: font,
+            size: .2,
+            height: 0.1,
+            curveSegments: 12,
+            bevelEnabled: false
+        });
+
+        // Adding the text to the popup
+        const material = createBasicMaterialWithColor('3a3b3c');
+        const textMesh = new THREE.Mesh(textGeometry, material);
+        console.log(popup);
+        let popupTimeline = gsap.timeline({paused: true});
+        let animDuration = 0.5;
+        popupTimeline.to(popup.position, {
+            x: 0,
+            y: 0,
+            z: -5,
+            duration: 0,
+            ease: 'power1.inOut'
+        })
+        .to(popup.material, {
+            opacity: 1,
+            duration: animDuration,
+            ease: 'power1.inOut'
+        })
+        .to(popup.scale, {
+            x: 1,
+            y: 1,
+            duration: animDuration,
+            ease: 'power1.inOut',
+            onComplete: () => {
+                textMesh.position.x = popup.position.x - 1.4;
+                textMesh.position.y = -popup.position.y + .3;
+                popup.add(textMesh);
+            }
+        }, '-=' + animDuration)
+        popupTimeline.play();
+    });
+
 }
 
 function removePopup() {
@@ -284,8 +279,15 @@ function removePopup() {
         duration: 0,
         ease: 'power1.inOut'
     });
-
     popupTimeline.play();
+
+    // Remove mesh children from popup
+    if (popup.children.length > 0) {
+        console.log("Removing children!");
+        popup.children.forEach((child) => {
+            popup.remove(child);
+        });
+    }
 }
 
 // Configurator mode or coffeShop mode
@@ -303,14 +305,10 @@ let originalPlaceholderPosition;
 // Importing the 3D model for the cabin
 const loader = new GLTFLoader();
 let cabin;
-let coffeeHeight;
 let coffeeShopIds = new Set();
 function importCabinModel() {
     loader.load('../3d_models/beohus_with_coffee_shop_finale1.gltf', function(gltf) {
-        console.log(gltf);
         cabin = gltf.scene;
-        console.log(cabin);
-        
         scene.add(cabin);
     
         // Initial settings to the cabin
@@ -367,9 +365,6 @@ function importCabinModel() {
     
         // Set the camera rotation
         camera.rotation.set(-2.5584984615871456, 0.5050634351181527, 2.8326555783283576);
-
-        getIds();
-
     }, undefined, function (error) {
         console.error(error);
     });
@@ -377,10 +372,9 @@ function importCabinModel() {
 
 importCabinModel();
 
-
+// Support function to get all the coffeshop meshes IDs
 function getIds() {
     cabin.traverse((child) => {
-
         if (child.name.includes('coffeeshop_')) {
             if (child.isMesh) {
                 coffeeShopIds.add(child.name);
@@ -391,7 +385,6 @@ function getIds() {
             }
         }
     });
-
     console.log(coffeeShopIds);
 }
 
@@ -411,9 +404,6 @@ function animate() {
     if (popup != null) {
         popup.lookAt(camera.position);
     }
-    
-    // console.log(camera);
-
     renderer.render(scene, camera);
 }
 animate();
@@ -574,10 +564,6 @@ function isNamePresentInObject(name) {
     return null;
 }
   
-// TODO Create a popup instead of showing the dimensions on the elment.
-    // To get the dynamic dimensions working, it will be too complicated to account for the camera position
-    // and to calculate to find the perfect spot to spawn the text.
-// The popup should spawn in front of the camera (at a decent distance) and despawn once it's clicked. 
 let popupIsDisplayed = false;
 let textForElementName;
 function showSizeOnElementClick() {
@@ -594,31 +580,25 @@ function showSizeOnElementClick() {
     console.log(raycaster.intersectObject(popup).length > 0);
 
     if (raycaster.intersectObject(popup).length > 0) {
-        console.log("Remove popup");
         removePopup();
         popupIsDisplayed = false;
     } else if (intersects.length > 0) {
         let nameOfObject = intersects[0].object.name;
-        console.log("Clicked " + nameOfObject)
         let namePresentObject = isNamePresentInObject(nameOfObject);
         
         if (namePresentObject != null) {
             let hoveringOver = namePresentObject.hoveredObject;
-            let mainObjectName = namePresentObject.mainObject;
-            // console.log('Hovering over ' + hoveringOver);
-
-            // TODO Show dimensions on mesh;
-            let height = '3.60 m'; // Pull this info from a JSON database
-            let width = '1.2 m'; // Pull this info from a JSON database
+            // Get hovered item's settings
+            let settingsArray = settings.hoverElementsSizes[hoveringOver];
+            let name = settingsArray[0];
+            let height = settingsArray[1];
+            let width = settingsArray[2];
             
             // Show dimensions over the element 
             if (!popupIsDisplayed) { 
                 textForElementName = hoveringOver;
                 popupIsDisplayed = true;
-                let mainObject = cabin.getObjectByName(mainObjectName);
-                
-                console.log("Spawning popup");
-                spawnPopupAtLocation('asd', 'asd');
+                spawnPopupAtLocation(name, height, width);
             }
         }  
     } 
@@ -631,14 +611,7 @@ function clearSpawnedText() {
         // Dispose of the geometry and material after removing from the scene
         heightTextMesh.geometry.dispose();
         widthTextMesh.material.dispose();
-
-        // Set the reference to null to indicate that the text is no longer displayed
-        heightTextMesh = null;
-        widthTextMesh = null;
-        textIsDisplayed = false;
-
     }
-    textIsDisplayed = false;
 }
     
 $('#Scene1').click(function() {
@@ -669,7 +642,7 @@ $('#sizeMode').click(function() {
     if (sizeMode) {
         window.addEventListener('click', showSizeOnElementClick);
     } else {
-        clearSpawnedText();
+        removePopup();
         window.removeEventListener('click', showSizeOnElementClick);
     }  
 });
@@ -971,7 +944,6 @@ function hoverInConfiguratorMode() {
                 currentHoveredWall = null;
             }
         }
-        
     } 
 }
 
