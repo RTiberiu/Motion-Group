@@ -6,6 +6,7 @@ Quick rules:
 */
 
 /*Text*/
+
 h1{
     font-family: Arial, Helvetica, sans-serif;
     color:#FFFFFF;
@@ -24,6 +25,7 @@ footer p{
 }
 footer a{
     color: #233D1F;
+
 }
 
 /*
@@ -31,6 +33,7 @@ Must use Monument Extended for oversized headings and large display text
 Must use Helvetica for Document headings, body copy and annotations
 Ecomms and colab must be Arial
 */
+
 
 /* button bar styling*/
 button{
@@ -117,6 +120,7 @@ section{
     width: 75%;
     margin: auto;
 }
+
 /*
 Dark green/Moorland:
     R:35 G:61 B:31
