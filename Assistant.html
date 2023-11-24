@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+    <head>
+        <meta charset="utf-8">
+        <title>Display prototype</title>
+        <link rel="stylesheet" href="bootstrap/bootstrap.min.css">
+        <link rel="stylesheet" href="Assistant.css">
+        <link rel="stylesheet" href="main.css">
+        <script src="jquery-3.7.1.slim.js"></script>
+        <script src="assistant.js"></script>
+        
+    </head>
+
+    <body>
+        
+        <header  style="text-align: center;">
+            <img src="Images/beòhus-logo-reverse-rgb.png" style="height: 50px; width: 275px;">
+        </header>
+        
+        <nav>
+            <a href="main.html"><button><h2>Go to design protopype</h2></button></a>
+        </nav>
+        
+        <div class="content">
+            <article>
+                <section>
+                    <ul id="messages">
+                        <li class="bot"><p> Hello, how can I help?</p></li>
+                    </ul>
+                </section>
+
+                <section>
+                    <ul id="start">
+                        <li><button id="time" onclick="reply('time')"><h2>Timing</h2></button></li>
+                        <li><button id="materials" onclick="reply('materials')"><h2>Materials</h2></button></li>
+                        <li><button id="available" onclick="reply('available')"><h2>Availability</h2></button></li>
+                        <li><button id="price" onclick="reply('price')"><h2>Price</h2></button></li>
+                    </ul>
+
+                    <ul id="locationCountry" class="smolhidden">
+                        <li><button id="scot" onclick="reply('scot')"><h2>Scotland</h2></button></li>
+                        <li><button id="eng" onclick="reply('eng')"><h2>England</h2></button></li>
+                    </ul>
+
+                    <ul id="locationDirection" class="smolhidden">
+                        <li><button id="north" onclick="reply('north')"><h2>North</h2></button></li>
+                        <li><button id="east" onclick="reply('east')"><h2>East</h2></button></li>
+                        <li><button id="south" onclick="reply('south')"><h2>South</h2></button></li>
+                        <li><button id="west" onclick="reply('west')"><h2>West</h2></button></li>
+                    </ul>
+
+                    <ul id="locationTrerrain" class="smolhidden">
+                        <li><button id="forest" onclick="reply('forest')"><h2>Forest</h2></button></li>
+                        <li><button id="cliffs" onclick="reply('cliffs')"><h2>Cliffs</h2></button></li>
+                        <li><button id="hills" onclick="reply('hills')"><h2>Hills</h2></button></li>
+                        <li><button id="plains" onclick="reply('plains')"><h2>Plains/Fields</h2></button></li>
+                    </ul>
+                    <button onclick="reset()"><h2>Ask another question</h2></button>
+                </section>
+                
+            </article>
+
+        </div>
+
+    </body>
+
+</html>
