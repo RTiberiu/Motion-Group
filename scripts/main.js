@@ -46,9 +46,6 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.05; 
 controls.rotateSpeed = 0.5;
 
-// Set the camera position
-camera.position.z = 5;
-
 // Toggle for displaying the size or not on click
 let sizeMode = false;
 
@@ -123,7 +120,6 @@ function onMouseClick(event) {
             uniqueElements.add(intersects[0].object.name);
             console.log("Clicked Object name: " + intersects[0].object.name);
             console.log(intersects[0].object);
-            console.log(intersects[0].object);
         }
     }
 }
@@ -197,8 +193,102 @@ function showDimensionsAtPosition(height, width, mainObject) {
     
 }
 
-// Configurator mode
+// Create and store the popup element
+scene.add(camera);
+function loadPopupElement() {
+    const geometry = new THREE.BoxGeometry(3, 2, .1);
+    const material = createBasicMaterialWithColor('fffff2');
+    material.transparent = true;
+    material.opacity = 0;
+    const popup = new THREE.Mesh(geometry, material);
+    popup.userData.id = 'popup';
+    popup.scale.x = 0.5;
+    popup.scale.y = 0.5;
+    camera.add(popup);
+    return popup;
+}
+const popup = loadPopupElement();
+
+function spawnPopupAtLocation(name, height, width) {
+    let text = `Wall: ${name}\nHeight: ${height}\nWidth: ${width}`
+    fontLoader.load('../fonts/Montserrat Thin_Regular.json', function (font) {
+        const textGeometry = new TextGeometry(text, {
+            font: font,
+            size: .2,
+            height: 0.1,
+            curveSegments: 12,
+            bevelEnabled: false
+        });
+
+        // Adding the text to the popup
+        const material = createBasicMaterialWithColor('3a3b3c');
+        const textMesh = new THREE.Mesh(textGeometry, material);
+        console.log(popup);
+        let popupTimeline = gsap.timeline({paused: true});
+        let animDuration = 0.5;
+        popupTimeline.to(popup.position, {
+            x: 0,
+            y: 0,
+            z: -5,
+            duration: 0,
+            ease: 'power1.inOut'
+        })
+        .to(popup.material, {
+            opacity: 1,
+            duration: animDuration,
+            ease: 'power1.inOut'
+        })
+        .to(popup.scale, {
+            x: 1,
+            y: 1,
+            duration: animDuration,
+            ease: 'power1.inOut',
+            onComplete: () => {
+                textMesh.position.x = popup.position.x - 1.4;
+                textMesh.position.y = -popup.position.y + .3;
+                popup.add(textMesh);
+            }
+        }, '-=' + animDuration)
+        popupTimeline.play();
+    });
+
+}
+
+function removePopup() {
+    let popupTimeline = gsap.timeline({paused: true});
+    let animDuration = 0.5;
+    popupTimeline.to(popup.material, {
+        opacity: 0,
+        duration: animDuration,
+        ease: 'power1.inOut'
+    })
+    .to(popup.scale, {
+        x: 0.5,
+        y: 0.5,
+        duration: animDuration,
+        ease: 'power1.inOut'
+    }, '-=' + animDuration)
+    popupTimeline.to(popup.position, {
+        x: 0,
+        y: 0,
+        z: +5,
+        duration: 0,
+        ease: 'power1.inOut'
+    });
+    popupTimeline.play();
+
+    // Remove mesh children from popup
+    if (popup.children.length > 0) {
+        console.log("Removing children!");
+        popup.children.forEach((child) => {
+            popup.remove(child);
+        });
+    }
+}
+
+// Configurator mode or coffeShop mode
 let isConfiguratorMode = false;
+let isCoffeeShopMode = false;
 
 // Storing configurator components
 let configPlaceholders = [["together"]];
@@ -211,13 +301,10 @@ let originalPlaceholderPosition;
 // Importing the 3D model for the cabin
 const loader = new GLTFLoader();
 let cabin;
-
+let coffeeShopIds = new Set();
 function importCabinModel() {
-    loader.load('../3d_models/beohusconfig_04.gltf', function(gltf) {
-        console.log(gltf);
+    loader.load('../3d_models/beohus_with_coffee_shop_finale1.gltf', function(gltf) {
         cabin = gltf.scene;
-        console.log(cabin);
-        
         scene.add(cabin);
     
         // Initial settings to the cabin
@@ -228,10 +315,12 @@ function importCabinModel() {
                 child.receiveShadow = true;
     
                 // Hide configurator walls and placeholders
-                if (child.name.includes('wall_') || child.name.includes('placeholder_')) {
-                    console.log("Hiding configuration walls!");
+                let isWall = child.name.includes('wall_');
+                let isPlaceholder = child.name.includes('placeholder_');
+                let isCoffeeShop = child.name.includes('coffeeshop_')
+                if (isWall || isPlaceholder || isCoffeeShop) {
                     // Clone the material and apply it to mesh to avoid animating on shared material
-                    let clonedMaterial = child.material.clone()
+                    let clonedMaterial = child.material.clone();
                     clonedMaterial.transparent = true;
                     child.material = clonedMaterial;
                     // Make the mesh transparent
@@ -240,23 +329,26 @@ function importCabinModel() {
                     // Store mesh names into arrays
                     let boundingBox = new THREE.Box3().setFromObject(child);
                     let objectHeight = boundingBox.max.y - boundingBox.min.y;
-                    if (child.name.includes('wall_')) {
+                    if (isWall) {
                         configWalls[0].push(child.name);
                         // Store original wall position
                         if (originalWallPosition == null) {
                             originalWallPosition = child.position.y;
                         }
                         // Move walls underneath the cabin
-                        newWallPosition = child.position.y - objectHeight - 0.2;
+                        newWallPosition = child.position.y - objectHeight - .4;
                         child.position.y = newWallPosition;
-                    } else if (child.name.includes('placeholder_')) {
+                    } else if (isPlaceholder) {
                         configPlaceholders[0].push(child.name);
                         placeholderHeight = objectHeight;
-    
+
                         // Store original placeholder position
                         if (originalPlaceholderPosition == null) {
                             originalPlaceholderPosition = child.position.y;
                         }
+                        child.position.y = child.position.y - objectHeight - .4;
+                    } else if (isCoffeeShop) {
+                        child.position.y = child.position.y - objectHeight - 5;
                     }
                 }
             }
@@ -274,6 +366,22 @@ function importCabinModel() {
 
 importCabinModel();
 
+// Support function to get all the coffeshop meshes IDs
+function getIds() {
+    cabin.traverse((child) => {
+        if (child.name.includes('coffeeshop_')) {
+            if (child.isMesh) {
+                coffeeShopIds.add(child.name);
+            } else {
+                child.children.forEach((childMesh) => {
+                    coffeeShopIds.add(childMesh.name);
+                });
+            }
+        }
+    });
+    console.log(coffeeShopIds);
+}
+
 // Function that runs every second to animate
 function animate() {
     requestAnimationFrame(animate);
@@ -286,9 +394,10 @@ function animate() {
         heightTextMesh.lookAt(camera.position);
         widthTextMesh.lookAt(camera.position);
     }
-    
-    // console.log(camera);
 
+    if (popup != null) {
+        popup.lookAt(camera.position);
+    }
     renderer.render(scene, camera);
 }
 animate();
@@ -338,9 +447,9 @@ function animateElements(arrayOffElementNames, secondsToAnimate, lowerElement, d
                 ease: "power3.in"
             }, '');
         }
-        
+
         // Clone the material and apply it to mesh to avoid animating on shared material
-        let clonedMaterial = object.material.clone()
+        let clonedMaterial = object.material.clone();
         clonedMaterial.transparent = true;
         object.material = clonedMaterial;
         
@@ -362,15 +471,12 @@ function animateElements(arrayOffElementNames, secondsToAnimate, lowerElement, d
     let totalItemsToAnimate = countTotalElementsOfArray(localArrayOfElementNames);
     // let animStagger = secondsToAnimate / totalItemsToAnimate;
     let itemAnimationTime = secondsToAnimate / totalItemsToAnimate;
-    let animStagger = 1;
-    
+    let animStagger = itemAnimationTime / 2;
     let mainTimeline = gsap.timeline({paused: true, stagger: animStagger});
     // Loop though the array of arrays and create a timeline for each
     localArrayOfElementNames.forEach((elementArray, indexSet) => {
         if (Array.isArray(elementArray)) {
-            
             animationStyle = elementArray.shift();
-            // let itemAnimationTime = secondsToAnimate - (animStagger * indexSet + 1);
             if (animationStyle == 'together') {
                 currentTimeline = gsap.timeline({paused: false, stagger: 0});
                 animationDelay = false;
@@ -412,7 +518,7 @@ function countTotalElementsOfArray(array) {
         }
     });
     return count;
-}
+}   
 
 function animateCameraToPosition(position, meshNameToLookAt, duration) {
     let objectToLookAt = cabin.getObjectByName(meshNameToLookAt);
@@ -451,13 +557,9 @@ function isNamePresentInObject(name) {
     return null;
 }
   
-// TODO Create a popup instead of showing the dimensions on the elment.
-    // To get the dynamic dimensions working, it will be too complicated to account for the camera position
-    // and to calculate to find the perfect spot to spawn the text.
-// The popup should spawn in front of the camera (at a decent distance) and despawn once it's clicked. 
-let textIsDisplayed = false;
+let popupIsDisplayed = false;
 let textForElementName;
-function showSizeOnElementHover() {
+function showSizeOnElementClick() {
     const mouse = new THREE.Vector2();
     mouse.x = mouseX;
     mouse.y = mouseY;
@@ -467,40 +569,32 @@ function showSizeOnElementHover() {
 
     intersects.length = 0;
     raycaster.intersectObjects(scene.children, true, intersects);
+    console.log(raycaster.intersectObject(popup));
+    console.log(raycaster.intersectObject(popup).length > 0);
 
-    if (intersects.length > 0) {
+    if (raycaster.intersectObject(popup).length > 0) {
+        removePopup();
+        popupIsDisplayed = false;
+    } else if (intersects.length > 0) {
         let nameOfObject = intersects[0].object.name;
         let namePresentObject = isNamePresentInObject(nameOfObject);
         
         if (namePresentObject != null) {
             let hoveringOver = namePresentObject.hoveredObject;
-            let mainObjectName = namePresentObject.mainObject;
-            // console.log('Hovering over ' + hoveringOver);
-
-            // TODO Show dimensions on mesh;
-            let height = '3.60 m'; // Pull this info from a JSON database
-            let width = '1.2 m'; // Pull this info from a JSON database
+            // Get hovered item's settings
+            let settingsArray = settings.hoverElementsSizes[hoveringOver];
+            let name = settingsArray[0];
+            let height = settingsArray[1];
+            let width = settingsArray[2];
             
             // Show dimensions over the element 
-            if (!textIsDisplayed) { 
+            if (!popupIsDisplayed) { 
                 textForElementName = hoveringOver;
-                textIsDisplayed = true;
-                let mainObject = cabin.getObjectByName(mainObjectName);
-                
-                // Pass the main object and its dimensions
-                showDimensionsAtPosition(height, width, mainObject);
+                popupIsDisplayed = true;
+                spawnPopupAtLocation(name, height, width);
             }
-
-            // Reset text if hovering over another element
-            // console.log("hoveringOver: " + hoveringOver + " textForElementName: " + textForElementName);
-            if (hoveringOver != textForElementName) {
-                console.log("Changed hovered element. Resetting text.")
-                textIsDisplayed = false;
-                clearSpawnedText();
-            } 
-        }
-        
-    }
+        }  
+    } 
 }
 
 function clearSpawnedText() {
@@ -510,14 +604,7 @@ function clearSpawnedText() {
         // Dispose of the geometry and material after removing from the scene
         heightTextMesh.geometry.dispose();
         widthTextMesh.material.dispose();
-
-        // Set the reference to null to indicate that the text is no longer displayed
-        heightTextMesh = null;
-        widthTextMesh = null;
-        textIsDisplayed = false;
-
     }
-    textIsDisplayed = false;
 }
     
 $('#Scene1').click(function() {
@@ -546,10 +633,10 @@ $('#sizeMode').click(function() {
     console.log('Size mode! ', sizeMode);
 
     if (sizeMode) {
-        window.addEventListener('mousemove', showSizeOnElementHover);
+        window.addEventListener('click', showSizeOnElementClick);
     } else {
-        clearSpawnedText();
-        window.removeEventListener('mousemove', showSizeOnElementHover);
+        removePopup();
+        window.removeEventListener('click', showSizeOnElementClick);
     }  
 });
 
@@ -609,11 +696,70 @@ $('#Scene7').click(function () {
     
     // Reverse cabin objects animations
     setTimeout(() => {
-        console.log('Details loop');
-        console.log(animationTimelines.length - 1);
-        console.log("Reversing the timeline!");
         reverseTimelineAtIndex(0, 4, true);
     }, timeout * 1000);
+});
+
+$('#coffeeShop').click(function() {
+    // Toggle configurator mode
+    if (!isCoffeeShopMode) isCoffeeShopMode = true;
+    else isCoffeeShopMode = false;
+
+    if (isCoffeeShopMode) {
+        console.log('Animating coffee shop ', cabin);
+        // Animate camera
+        let cameraDelay = 3000;
+        animateCameraToPosition(settings.topDownSidePosition, 'G-__559866', 3);
+        setTimeout(() => {animateCameraToPosition(settings.topDownCoffeePosition, 'G-__559866', 4)}, cameraDelay);
+        cameraDelay += 4000;
+        setTimeout(() => {animateCameraToPosition(settings.topDownCoffeeTwoPosition, 'G-__559866', 4)}, cameraDelay);
+        cameraDelay += 4000;
+        setTimeout(() => {animateCameraToPosition(settings.topDownCoffeeThreePosition, 'G-__559866', 4)}, cameraDelay);
+        cameraDelay += 4000;
+        setTimeout(() => {animateCameraToPosition(settings.topDownCoffeeFourPosition, 'G-__559866', 6)}, cameraDelay);
+        cameraDelay += 6500;
+        setTimeout(() => {animateCameraToPosition(settings.topDownSidePosition, 'G-__559866', 4)}, cameraDelay);
+        
+        // Animate roof
+        animateElements(settings.roofElementsNames, 2, false, 8, false, true);
+        
+        // Animate interior walls
+        let setAnimationDelay = 0;
+        setAnimationDelay += 2000;
+        setTimeout(() => {animateElements(settings.interiorWallls, 4, true, 7, false, true);}, setAnimationDelay);
+
+        // Animate furniture 
+        setAnimationDelay += 1500;
+        setTimeout(() => {animateElements(settings.furniture, 2, true, 2, false, true);}, setAnimationDelay);
+        setTimeout(() => {animateElements(settings.furnitureTwo, 2, true, 2, false, true);}, setAnimationDelay);
+        setTimeout(() => {animateElements(settings.furnitureThree, 2, true, 2, false, true);}, setAnimationDelay);
+        setTimeout(() => {animateElements(settings.outsideFurniture, 2, true, 6, false, true);}, setAnimationDelay);
+        
+        // Animate the coffee shop items
+        setAnimationDelay += 2000;
+        let coffeeShopObjectsArray = [
+            settings.coffeeShop,
+            settings.coffeeShopTwo,
+            settings.coffeeShopThree,
+            settings.coffeeShopFour,
+            settings.coffeeShopFive,
+            settings.coffeeShopSix,
+            settings.coffeeShopSeven
+        ];
+        
+        setTimeout(() => {animateElements(coffeeShopObjectsArray[0], 10, false, 0, true, true);}, setAnimationDelay);
+        setTimeout(() => {animateElements(coffeeShopObjectsArray[1], 10, false, 0, true, true);}, setAnimationDelay);
+        setTimeout(() => {animateElements(coffeeShopObjectsArray[2], 10, false, 0, true, true);}, setAnimationDelay);
+        setTimeout(() => {animateElements(coffeeShopObjectsArray[3], 10, false, 0, true, true);}, setAnimationDelay);
+        setTimeout(() => {animateElements(coffeeShopObjectsArray[4], 10, false, 0, true, true);}, setAnimationDelay);
+        setTimeout(() => {animateElements(coffeeShopObjectsArray[5], 10, false, 0, true, true);}, setAnimationDelay);
+        setTimeout(() => {animateElements(coffeeShopObjectsArray[6], 10, false, 0, true, true);}, setAnimationDelay);
+
+    } else {
+        reverseTimelineAtIndex(animationTimelines.length - 1, 4, false);
+        animateCameraToPosition(settings.topDownCoffeePosition, 'G-__559866', 16);
+        setTimeout(() => {animateCameraToPosition(settings.initialCameraPosition, 'G-__559866', 4)}, 16000);
+    }
 });
 
 $('#elementsSet').click(function() {
@@ -699,7 +845,7 @@ function initializeConfigurator(showConfigurator) {
         setTimeout(() => {animateElements(settings.furniture, 5, true, 2, false, true);}, setAnimationDelay);
         setTimeout(() => {animateElements(settings.furnitureTwo, 5, true, 2, false, true);}, setAnimationDelay);
         setTimeout(() => {animateElements(settings.furnitureThree, 5, true, 2, false, true);}, setAnimationDelay);
-    
+        
         // Show placeholders
         setAnimationDelay += 5000;
         let placeHolderPosition = originalPlaceholderPosition + placeholderHeight;
@@ -763,7 +909,6 @@ function hoverInConfiguratorMode() {
 
         // Check if it intersects with a wall
         if (nameOfIntersectObject.includes('wall_')) {
-            console.log("Hovering over wall: " + nameOfIntersectObject)
             if (currentHoveredWall != null && currentHoveredWall != intersectedObject) {
                 // Restore material to previous item
                 currentHoveredWall.material = originalWallMaterial;
@@ -782,16 +927,13 @@ function hoverInConfiguratorMode() {
             // Change color of hovered placeholder
             intersectedObject.material = orangeMaterial;
         } else {
-            console.log("Else wall");
             // Restore original material
             if (originalWallMaterial != null && currentHoveredWall != null) {
-                console.log("Restored material for " + currentHoveredWall.name);
                 currentHoveredWall.material = originalWallMaterial;
                 currentHoveredWall.transparent = false;
                 currentHoveredWall = null;
             }
         }
-        
     } 
 }
 
